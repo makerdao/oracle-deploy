@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -u -e -o pipefail
+
+CONFIG_FILE="$1"
+
+graphiteUrl=$(jq -r '.graphiteUrl' "$CONFIG_FILE")
+graphiteApiKey=$(cat "$(jq -r '.graphiteApiKeyFile' "$CONFIG_FILE")")
+intervalSeconds=$(jq -c '.intervalSeconds' "$CONFIG_FILE")
+env=$(jq -r '.env' "$CONFIG_FILE")
+node=$(jq -r '.node' "$CONFIG_FILE")
+
+echo "Pushing spire output to Graphite ($graphiteUrl)" >&2
+
+while IFS= read -r _data; do
+	jq --compact-output \
+			--arg env "$env" \
+			--arg node "$node" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'[{
+				name:("spire."+.key),value:.val,time:.ts,interval:$intervalSeconds,
+				tags:["system=oracle","environment="+$env,"sys=oracle","node="+$node,"env="+$env,"service=spire","metric="+.key,"peerId="+.id]
+			}]' <<<"$_data" \
+	| tee >(cat >&2) | curl --silent --request POST \
+		--header "Authorization: Bearer $graphiteApiKey" \
+		--header "Content-Type: application/json" \
+		--data @- \
+		"$graphiteUrl"
+done

@@ -1,4 +1,4 @@
-{ oracle-suite }:
+{ oracle-suite, monitor-bins }:
 { options, config, lib, pkgs, input, node, ... }:
 let
   util = pkgs.callPackages ./util.nix {
@@ -6,7 +6,7 @@ let
     inherit input;
   };
 in {
-  require = [ ((import ./services/oracle-node.nix { name = "spire"; }) { inherit oracle-suite; }) ];
+  require = [ ((import ./services/oracle-node.nix { name = "spire"; }) { inherit oracle-suite monitor-bins; }) ];
   services.spire = {
     enable = true;
     logLevel = "info";
