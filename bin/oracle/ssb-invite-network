@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+SSH_OPTS=(-o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no)
+
+mapfile -t nodes < <(
+  nixiform input 'nodes
+    |to_entries|.[]
+    |.value.ip
+  ')
+inviteCount="${#nodes[@]}"
+
+mapfile -t nodes < <(
+  nixiform input 'nodes
+    |to_entries|.[]
+    |select(.key|test("^feed_"))
+    |.value.ip
+  ')
+invitorIp=${nodes["${1:-0}"]}
+invite=$(ssh "${SSH_OPTS[@]}" "root@$invitorIp" sudo -u omnia ssb-server invite.create "$inviteCount" | jq -r .)
+_acceptCommand=(ssb-server invite.accept "'$invite'")
+echo "Accept Invitation (from $invitorIp) Command ($inviteCount): ${_acceptCommand[*]}"
+
+mapfile -t nodes < <(
+  nixiform input 'nodes
+    |to_entries|.[]
+    |select(.key|test("^feed_|^relay_"))
+    |.value.ip
+  ')
+for i in $(seq 0 $((${#nodes[@]} - 1))); do
+	ip=${nodes[$i]}
+	if [[ "$ip" == "$invitorIp" ]]; then
+		echo "Skipping $ip"
+	else
+		echo ssh "${SSH_OPTS[@]}" "root@$ip" sudo -u omnia "${_acceptCommand[@]}"
+		ssh "${SSH_OPTS[@]}" "root@$ip" sudo -u omnia "${_acceptCommand[@]}" || true
+	fi
+done
+
+mapfile -t nodes < <(
+  nixiform input 'nodes
+    |to_entries|.[]
+    |select(.key|test("^eth_"))
+    |.value.ip
+  ')
+for i in $(seq 0 $((${#nodes[@]} - 1))); do
+	ip="${nodes[$i]}"
+	if [[ "$ip" == "$invitorIp" ]]; then
+		echo "Skipping $ip"
+	else
+		echo ssh "${SSH_OPTS[@]}" "root@$ip" sudo -u monitor "${_acceptCommand[@]}"
+		ssh "${SSH_OPTS[@]}" "root@$ip" sudo -u monitor "${_acceptCommand[@]}" || true
+	fi
+done
+
+mapfile -t nodes < <(
+  nixiform input 'nodes
+    |to_entries|.[]
+    |select(.key|test("^ssb_"))
+    |.value.ip
+  ')
+for i in $(seq 0 $((${#nodes[@]} - 1))); do
+	ip="${nodes[$i]}"
+	if [[ "$ip" == "$invitorIp" ]]; then
+		echo "Skipping $ip"
+	else
+		echo ssh "${SSH_OPTS[@]}" "root@$ip" sudo -u ssb-server "${_acceptCommand[@]}"
+		ssh "${SSH_OPTS[@]}" "root@$ip" sudo -u ssb-server "${_acceptCommand[@]}" || true
+	fi
+done

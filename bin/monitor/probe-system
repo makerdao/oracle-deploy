@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -u -e -o pipefail
+
+echo "Probing System" >&2
+
+size=$(df --total --block-size=1 --output=avail | tail -1)
+
+jq --null-input --compact-output \
+	--arg size "$size" \
+	--argjson ts "$(date +%s)" \
+	'{key:"df_total_avail",val:$size,ts:$ts}'

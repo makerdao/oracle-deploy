@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -u -e -o pipefail
+
+MSG=$(head -500 /dev/urandom | tr -cd '[:alnum:]' | cut -c -7500)
+for i in $(seq 1 32); do while true; do ssb-server publish --type post --text "$MSG" > /dev/null; done & done

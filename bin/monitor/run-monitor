@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -u -e -o pipefail
+
+export CONFIG_FILE="${CONFIG_FILE:-"./monitor.json"}"
+graphiteUrl=$(jq -r '.graphiteUrl' "$CONFIG_FILE")
+graphiteApiKey=$(cat "$(jq -r '.graphiteApiKeyFile' "$CONFIG_FILE")")
+intervalSeconds=$(jq -c '.intervalSeconds' "$CONFIG_FILE")
+env=$(jq -r '.env' "$CONFIG_FILE")
+node=$(jq -r '.node' "$CONFIG_FILE")
+ethRpcUrl=$(jq -r '.ethRpcUrl' "$CONFIG_FILE")
+contracts=$(jq -c '.contracts[]' "$CONFIG_FILE")
+feeds=$(jq -c '.feeds[]' "$CONFIG_FILE")
+_probeAll=$(jq -r '.probeAll' "$CONFIG_FILE")
+_ssbUser=$(jq -r '.user' "$CONFIG_FILE")
+
+echo "Pushing metrics to Graphite ($graphiteUrl)" >&2
+
+{
+	if [[ "$_probeAll" == "true" ]]; then
+		probe-source-gofer <<< "$contracts" \
+			| jq --compact-output \
+				--arg env "$env" \
+				--arg node "$node" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+				name:(.symbol+".contract_price"),
+				value:(.price|tonumber),
+				time:.ts,
+				interval:$intervalSeconds,
+				tags:["system=oracle","environment="+$env,"sys=oracle","node="+$node,"env="+$env,"service=gofer","metric=gofer_price","symbol="+.symbol]
+			}'
+
+		probe-contracts "$ethRpcUrl" <<<"$contracts" \
+			| jq --compact-output \
+				--arg env "$env" \
+				--arg node "$node" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+				name:(.symbol+".contract_price"),
+				value:(.price|tonumber),
+				time:.ts,
+				interval:$intervalSeconds,
+				tags:["system=oracle","environment="+$env,"sys=oracle","node="+$node,"env="+$env,"service=eth","metric=contract_price","symbol="+.symbol]
+			}'
+
+		probe-transports <<<"$feeds" \
+			| jq --compact-output \
+				--arg env "$env" \
+				--arg node "$node" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+				name:(.symbol+".feed_price."+.feedId+"."+.transport),
+				value:.price,
+				time:.ts,
+				interval:$intervalSeconds,
+				tags:["system=oracle","environment="+$env,"sys=oracle","node="+$node,"env="+$env,"service=transport","metric=feed_price","feedId="+.feedId,"transport="+.transport,"symbol="+.symbol]
+			} | select(.value != null)'
+  fi
+
+	probe-ssb-server "$_ssbUser" \
+		| jq --compact-output \
+			--arg env "$env" \
+			--arg node "$node" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
+			name:("ssb-server."+.key),
+			value:(.val|tonumber),
+			time:.ts,
+			interval:$intervalSeconds,
+			tags:["system=oracle","environment="+$env,"sys=oracle","node="+$node,"env="+$env,"service=ssb-server","metric="+.key]
+		}'
+
+	probe-system \
+		| jq --compact-output \
+			--arg env "$env" \
+			--arg node "$node" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
+			name:("system."+.key),
+			value:(.val|tonumber),
+			time:.ts,
+			interval:$intervalSeconds,
+			tags:["system=oracle","environment="+$env,"sys=oracle","node="+$node,"env="+$env,"service=system","metric="+.key]
+		}'
+} \
+	| jq --slurp --compact-output \
+	| curl --silent --request POST \
+		--header "Authorization: Bearer $graphiteApiKey" \
+		--header "Content-Type: application/json" \
+		--data @- \
+		"$graphiteUrl"

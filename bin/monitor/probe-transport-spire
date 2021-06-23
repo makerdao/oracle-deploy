@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -u -e -o pipefail
+
+_ethId="$(jq -r '.eth' <<<"$1")"
+
+_stream="$(spire -c "$SPIRE_CONFIG" pull prices --filter.from "$_ethId" || true)"
+
+if [[ "$_stream" == "" || "$_stream" == "null" ]]; then
+	echo >&2 "No data for [spire|$_ethId]"
+	exit 0
+fi
+
+echo "Probing [spire|$_ethId]" >&2
+
+while IFS= read -r _symbol; do
+	if [[ "$_symbol" == "" ]]; then
+		continue
+	fi
+
+	_contentType=${_symbol/\/}
+
+	jq --compact-output \
+		--arg feedId "$_ethId" \
+		--arg symbol "$_symbol" \
+		--arg contentType "$_contentType" '
+			.[] | select(.price.wat == $contentType)
+			| {
+				transport: "spire",
+				symbol: $symbol,
+				feedId: $feedId,
+				ts: .price.age,
+				price: ((.price.val | tonumber) / 1e18)
+			}
+		' <<< "$_stream"
+done

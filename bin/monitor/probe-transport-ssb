@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -e -u -o pipefail
+
+_ssbId="$(jq -r '.ssb' <<<"$1")"
+_ethId="$(jq -r '.eth' <<<"$1")"
+
+SSB_LIMIT="${SSB_LIMIT:-50}"
+SSB_CACHE="${SSB_CACHE:-1}"
+
+_stream=$(ssb-server createUserStream \
+	--id "$_ssbId" \
+	--limit "$SSB_LIMIT" \
+	--fillCache "$SSB_CACHE" \
+	--reverse || true)
+
+if [[ "$_stream" == "" ]]; then
+	echo >&2 "No data for [ssb|$_ssbId|$_ethId]"
+	exit 0
+fi
+
+echo "Probing [ssb|$_ssbId|$_ethId]" >&2
+
+while IFS= read -r _symbol; do
+	[[ "$_symbol" == "" ]] && continue
+
+  _contentType=${_symbol/\/}
+
+	jq --slurp --compact-output \
+		--arg feedId "$_ethId" \
+		--arg symbol "$_symbol" \
+		--arg contentType "$_contentType" '
+			[.[] | select(.value.content.type == $contentType)]
+			| max_by(.value.content.time)
+			| {
+				transport: "ssb",
+				symbol: $symbol,
+				feedId: $feedId,
+				author: .value.author,
+				version: .value.content.version,
+				ts: .value.content.time,
+				tsHex: .value.content.timeHex,
+				msgID: .key,
+				previous: .value.previous,
+				type: .value.content.type,
+				price: .value.content.price,
+				priceHex: .value.content.priceHex,
+				signature: .value.content.signature
+			}
+		' <<< "$_stream"
+done

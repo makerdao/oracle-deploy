@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -u -e -o pipefail
+
+echo "Probing Scuttlebutt Server" >&2
+
+SSB_USER="${1:-"ssb-server"}"
+
+size=$(du --summarize --bytes "/var/lib/$SSB_USER/.ssb/flume/log.offset" | cut -f1)
+
+jq --null-input --compact-output \
+	--arg size "$size" \
+	--argjson ts "$(date +%s)" \
+	'{key:"log_size",val:$size,ts:$ts}'

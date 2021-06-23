@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e -o pipefail
+
+inputEth0=$(nixiform input nodes.eth_0)
+configRelay0=$(
+  nixiform output relay_0 services.omnia.pairs \
+    | jq -rc 'to_entries|.[]|{symbol:.key,address:.value.oracle}'
+)
+
+ethRpcUrl=$(jq -r .ip <<<"$inputEth0"):$(jq -r .eth_rpc_port <<<"$inputEth0")
+
+nixiform output relay_0 services.omnia.pairs \
+| jq -rc 'to_entries|.[]|{symbol:.key,address:.value.oracle}' \
+| probe-contracts "$ethRpcUrl"

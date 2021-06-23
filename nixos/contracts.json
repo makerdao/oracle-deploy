@@ -1,0 +1,12 @@
+[
+  {
+    "symbol": "ETH/USD",
+    "wat": "ETHUSD",
+    "address": "0x6fD14ecF113A70e553425842459f2eD87a9048C1"
+  },
+  {
+    "symbol": "BTC/USD",
+    "wat": "BTCUSD",
+    "address": "0xa4ACc5352407596e8Ecab4961ECe2b8d2EF8c522"
+  }
+]

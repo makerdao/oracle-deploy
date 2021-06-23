@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -u -e -o pipefail
+
+export CONFIG_FILE="${CONFIG_FILE:-"./monitor.json"}"
+
+echo "Probing Transports" >&2
+
+symbols='
+AAVE/USD
+AVAX/USD
+BAL/USD
+BAT/USD
+BTC/USD
+COMP/USD
+CRV/USD
+DOT/USD
+ETH/BTC
+ETH/USD
+FIL/USD
+KNC/ETH
+KNC/USD
+LINK/USD
+LRC/USD
+MANA/USD
+PAXG/USD
+SNX/USD
+SOL/USD
+UNI/USD
+USDT/USD
+WNXM/USD
+XRP/USD
+XTZ/USD
+YFI/USD
+ZEC/USD
+ZRX/USD
+'
+
+cat | while read -r line
+do
+	probe-transport-ssb "$line" <<< "$symbols"
+	probe-transport-spire "$line" <<< "$symbols"
+done
