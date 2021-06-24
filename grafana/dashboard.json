@@ -1,0 +1,614 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 6,
+  "iteration": 1624552488904,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "grafanacloud-oraclecoreunit-graphite",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 7,
+        "x": 0,
+        "y": 0
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "queryType": "randomWalk",
+          "refId": "A",
+          "target": "aliasByTags(seriesByTag('env=${environment}', 'metric=connectedPeerCount'), 'node')",
+          "textEditor": false
+        }
+      ],
+      "title": "Connection Count",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "grafanacloud-oraclecoreunit-graphite",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 33,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "graph": false,
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 2,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "ssb|spire.+"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 5
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 17,
+        "x": 7,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "graph": {},
+        "legend": {
+          "calcs": [
+            "range",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "7.4.4",
+      "repeat": "symbol",
+      "repeatDirection": "v",
+      "targets": [
+        {
+          "hide": false,
+          "refCount": 0,
+          "refId": "A",
+          "target": "aliasByTags(removeBelowValue(seriesByTag('sys=oracle', 'env=${environment}', 'metric=~contract_price|gofer_price', 'symbol=$symbol', 'node=~[0-9a-z_]+'), 1), 'symbol', 'metric')",
+          "textEditor": false
+        },
+        {
+          "hide": false,
+          "refCount": 0,
+          "refId": "B",
+          "target": "aliasByTags(seriesByTag('sys=oracle', 'env=${environment}', 'metric=feed_price', 'symbol=$symbol', 'node=~[0-9a-z_]+'), 'transport', 'feedId')",
+          "textEditor": false
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "$symbol",
+      "transformations": [],
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": "grafanacloud-oraclecoreunit-graphite",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "graph": false,
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 0,
+        "y": 8
+      },
+      "id": 10,
+      "options": {
+        "graph": {},
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "7.4.5",
+      "targets": [
+        {
+          "hide": false,
+          "refCount": 0,
+          "refId": "B",
+          "target": "aliasByTags(scale(movingSum(groupByTags(seriesByTag('metric=feed_price', 'environment=${environment}'), 'count', 'environment', 'transport'), '10min'), 0.1), 'transport')",
+          "textEditor": false
+        },
+        {
+          "hide": false,
+          "refCount": 0,
+          "refId": "A",
+          "target": "movingAverage(aliasByTags(scale(movingSum(groupByTags(seriesByTag('metric=feed_price', 'environment=${environment}'), 'count', 'environment', 'transport'), '10min'), 0.1), 'transport'), '30min')",
+          "textEditor": false
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Message Rate [per min.]",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": "grafanacloud-oraclecoreunit-graphite",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "graph": false,
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 0,
+        "y": 15
+      },
+      "id": 5,
+      "options": {
+        "graph": {},
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "delta"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "7.4.5",
+      "targets": [
+        {
+          "queryType": "randomWalk",
+          "refCount": 0,
+          "refId": "A",
+          "target": "sortByName(aliasByTags(seriesByTag('system=oracle', 'environment=${environment}', 'service=ssb-server', 'node=~[0-9a-z_-]+'), 'service', 'metric', 'node'), true)",
+          "textEditor": false
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": "grafanacloud-oraclecoreunit-graphite",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "graph": false,
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "system.df_total_avail.eth_0"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "graph": true,
+                  "legend": false,
+                  "tooltip": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 0,
+        "y": 22
+      },
+      "id": 12,
+      "options": {
+        "graph": {},
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "pluginVersion": "7.4.5",
+      "targets": [
+        {
+          "queryType": "randomWalk",
+          "refCount": 0,
+          "refId": "A",
+          "target": "sortByName(aliasByTags(seriesByTag('system=oracle', 'environment=${environment}', 'service=system', 'node=~[0-9a-z_-]+'), 'service', 'metric', 'node'), true)",
+          "textEditor": false
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "transparent": true,
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "spire-network",
+          "value": "spire-network"
+        },
+        "datasource": "grafanacloud-oraclecoreunit-graphite",
+        "definition": "tag_values(environment)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "environment",
+        "options": [],
+        "query": "tag_values(environment)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "",
+        "current": {
+          "selected": false,
+          "text": [
+            "BTC/USD",
+            "ETH/BTC",
+            "ETH/USD"
+          ],
+          "value": [
+            "BTC/USD",
+            "ETH/BTC",
+            "ETH/USD"
+          ]
+        },
+        "datasource": "grafanacloud-oraclecoreunit-graphite",
+        "definition": "tag_values(symbol)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "symbol",
+        "options": [],
+        "query": "tag_values(symbol)",
+        "refresh": 1,
+        "regex": ".+\\/.+",
+        "skipUrlSync": false,
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "10m",
+      "15m"
+    ]
+  },
+  "timezone": "",
+  "title": "Oracle Monitor",
+  "uid": "LA9FIz8Mk",
+  "version": 128
+}
