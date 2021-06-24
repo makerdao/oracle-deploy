@@ -13,7 +13,7 @@ feeds=$(jq -c '.feeds[]' "$CONFIG_FILE")
 _probeAll=$(jq -r '.probeAll' "$CONFIG_FILE")
 _ssbUser=$(jq -r '.user' "$CONFIG_FILE")
 
-echo "Pushing metrics to Graphite ($graphiteUrl)" >&2
+echo "Gathering metrics to send to Graphite ($graphiteUrl)" >&2
 
 {
 	if [[ "$_probeAll" == "true" ]]; then

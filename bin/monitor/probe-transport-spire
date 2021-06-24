@@ -2,6 +2,7 @@
 set -u -e -o pipefail
 
 _ethId="$(jq -r '.eth' <<<"$1")"
+echo "Probing [spire|$_ethId]" >&2
 
 _stream="$(spire -c "$SPIRE_CONFIG" pull prices --filter.from "$_ethId" || true)"
 
@@ -10,7 +11,6 @@ if [[ "$_stream" == "" || "$_stream" == "null" ]]; then
 	exit 0
 fi
 
-echo "Probing [spire|$_ethId]" >&2
 
 while IFS= read -r _symbol; do
 	if [[ "$_symbol" == "" ]]; then
