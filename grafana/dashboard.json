@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 6,
-  "iteration": 1624552488904,
+  "iteration": 1624955061730,
   "links": [],
   "panels": [
     {
@@ -230,6 +230,7 @@
           "custom": {
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisSoftMin": 0,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -534,8 +535,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "spire-network",
-          "value": "spire-network"
+          "text": "spire-scoring",
+          "value": "spire-scoring"
         },
         "datasource": "grafanacloud-oraclecoreunit-graphite",
         "definition": "tag_values(environment)",
@@ -560,7 +561,7 @@
       {
         "allValue": "",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": [
             "BTC/USD",
             "ETH/BTC",
@@ -610,5 +611,5 @@
   "timezone": "",
   "title": "Oracle Monitor",
   "uid": "LA9FIz8Mk",
-  "version": 128
+  "version": 130
 }

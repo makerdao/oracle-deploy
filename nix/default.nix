@@ -80,10 +80,9 @@ in rec {
           fi
         }
 
-        cryptUnlock && {
-          trap 'trap - EXIT; cryptLock' EXIT
-          addKey
-          echo '
+        addKey
+
+        echo '
         AWS API keys are setup automatically, to override run:
 
         $ AWS_ACCESS_KEY_ID=<your_aws_access_key_id>
@@ -100,7 +99,6 @@ in rec {
       '' + extraShellHook + ''
 
         source ${./shell/functions.sh}
-        } || echo Failed to setup env
       '';
     };
 }

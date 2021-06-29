@@ -1,0 +1,26 @@
+{
+    "oracle-suite": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "makerdao",
+        "repo": "oracle-suite",
+        "rev": "c2f3ab3a58b5f2ab829e09a45c414a08ead5c9ca",
+        "sha256": "16v1ypc4k3f01ygmvygyzlbq592rb9df9zqdlixyjkg36ypixk30",
+        "type": "tarball",
+        "url": "https://github.com/makerdao/oracle-suite/archive/c2f3ab3a58b5f2ab829e09a45c414a08ead5c9ca.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "oracles-v2": {
+        "branch": "master",
+        "description": null,
+        "homepage": null,
+        "owner": "makerdao",
+        "repo": "oracles-v2",
+        "rev": "a8d3e5a400c54fbf7e8cf517871e8ebc38fc8a3a",
+        "sha256": "0s3navbspz132b54m49x50nvprhk50bg7vvrg6y2hryvy2w1gxw8",
+        "type": "tarball",
+        "url": "https://github.com/makerdao/oracles-v2/archive/a8d3e5a400c54fbf7e8cf517871e8ebc38fc8a3a.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    }
+}
