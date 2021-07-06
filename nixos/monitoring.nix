@@ -4,8 +4,6 @@
   services.spire = {
     enable = true;
     logLevel = "debug";
-    staticId = true;
-    disableRpc = true;
     internal.logLevel = "debug";
   };
 }

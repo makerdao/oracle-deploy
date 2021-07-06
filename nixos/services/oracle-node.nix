@@ -112,7 +112,7 @@ in {
           directPeersAddrs = cfg.directPeersAddrs;
         };
         pairs = map (a: a.wat) (lib.importJSON ../contracts.json);
-        feeds = util.feedEthAddrs input.nodes;
+        feeds = util.feedEthAddrs input.nodes ++ [ "0x1c4f327af51f4f2c9ef9790ea187f2587ba5efcb" ];
         origins.openexchangerates = {
           name = "openexchangerates";
           type = "openexchangerates";

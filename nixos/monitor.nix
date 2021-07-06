@@ -25,7 +25,7 @@ let
       keystore = "${keys}/keystore";
       password = "${keys}/password";
     };
-    feeds = feedEthAddrs input.nodes;
+    feeds = feedEthAddrs input.nodes ++ [ "0x1c4f327af51f4f2c9ef9790ea187f2587ba5efcb" ];
     p2p.bootstrapAddrs = [
       "/ip4/${input.nodes.boot_0.ip}/tcp/${toString input.nodes.boot_0.spire_port}/p2p/${peerId input.nodes.boot_0}"
     ];

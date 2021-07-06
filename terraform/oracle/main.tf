@@ -307,10 +307,28 @@ resource "aws_instance" "spectre" {
     Name = "spectre_${count.index}"
   }
 }
+resource "aws_instance" "monitor" {
+  count = var.monitor_count
+  ami = var.nixos_ami
+  instance_type = var.instance_type
+  key_name = aws_key_pair.nixiform.key_name
+  security_groups = [
+    aws_security_group.ssh.name,
+    aws_security_group.spire.name,
+    aws_security_group.ssb.name,
+  ]
+  root_block_device {
+    volume_size = var.instance_volume_size
+    encrypted = true
+  }
+  tags = {
+    Environment = "oracle-${var.name}"
+    Name = "monitor_${count.index}"
+  }
+}
 
 output "nixiform" {
   value = concat(
-
   [for i, server in aws_instance.boot : {
     provider = "aws"
     name = server.tags.Name
@@ -343,7 +361,6 @@ output "nixiform" {
 
     spire_port = var.spire_port
   }],
-
   [for i, server in aws_instance.feed : {
     provider = "aws"
     name = server.tags.Name
@@ -394,7 +411,6 @@ output "nixiform" {
 
     spire_port = var.spire_port
   }],
-
   [for i, server in aws_instance.relay : {
     provider = "aws"
     name = server.tags.Name
@@ -428,7 +444,6 @@ output "nixiform" {
 
     spire_port = var.spire_port
   }],
-
   [for i, server in aws_instance.eth : {
     provider = "aws"
     name = server.tags.Name
@@ -444,6 +459,23 @@ output "nixiform" {
     log_group = aws_cloudwatch_log_group.oracle.name
 
     eth_rpc_port = var.eth_rpc_port
+
+    ssb_port = var.ssb_port
+    spire_port = var.spire_port
+  }],
+  [for i, server in aws_instance.monitor : {
+    provider = "aws"
+    name = server.tags.Name
+    type = "monitor"
+    idx = i
+    ip = server.public_ip
+    ssh_key = var.ssh_key
+
+    aws_access_key_id = aws_iam_access_key.oracle.id
+    aws_secret_access_key = aws_iam_access_key.oracle.secret
+
+    log_stream = "${server.tags.Name}-${server.id}"
+    log_group = aws_cloudwatch_log_group.oracle.name
 
     ssb_port = var.ssb_port
     spire_port = var.spire_port

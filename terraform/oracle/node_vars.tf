@@ -1,3 +1,9 @@
+variable "monitor_count" {
+  default = 0
+  description = "The number of monitoring nodes to create"
+  type = number
+}
+
 variable "feed_count" {
   default = 0
   description = "The number of feed nodes to create"
@@ -23,13 +29,13 @@ variable "relay_count" {
 }
 
 variable "eth_count" {
-  default = 1
+  default = 0
   description = "The number of ethereum nodes to create"
   type = number
 }
 
 variable "boot_count" {
-  default = 1
+  default = 0
   description = "The number of spire bootstrap nodes to create"
   type = number
 }
