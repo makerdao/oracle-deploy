@@ -17,5 +17,6 @@ in {
         util.peerId input.nodes.boot_0
       }"
     ];
+    ethereumRpc = "http://${input.nodes.eth_0.ip}:${toString input.nodes.eth_0.eth_rpc_port}";
   };
 }

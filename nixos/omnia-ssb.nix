@@ -7,15 +7,12 @@ let
     inherit input;
   })
     nodeSecretPath envSecretPath genCaps genSsb;
-
   sec = p: {
     path = nodeSecretPath node p;
     user = "omnia";
     group = "omnia";
   };
-
   caps = genCaps node;
-  ssb = genSsb node;
 in {
   services.omnia.ssbConfig = {
     caps = importJSON "${caps}";
@@ -28,9 +25,9 @@ in {
     connections.incoming.ws = [{
       scope = [ "public" "local" ];
       transform = "shs";
-      port = 8988;
+      port = node.ssb_port_ws;
       external = node.ip;
     }];
   };
-  services.omnia.ssbInitSecret = "${ssb}";
+  #  services.omnia.ssbInitSecret = "${genSsb node}";
 }

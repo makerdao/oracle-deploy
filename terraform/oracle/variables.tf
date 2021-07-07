@@ -19,6 +19,11 @@ variable "ssb_port" {
   type = number
   default = 33008
 }
+variable "ssb_port_ws" {
+  description = "Scuttblebot public port ws"
+  type = number
+  default = 33009
+}
 
 variable "spire_port" {
   description = "Spire public port"

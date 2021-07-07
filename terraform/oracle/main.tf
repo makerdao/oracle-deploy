@@ -36,14 +36,18 @@ resource "aws_security_group" "spire" {
 
 resource "aws_security_group" "ssb" {
   name = "oracle-${var.name}-allow-ssb-sg"
-
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
     from_port = var.ssb_port
     to_port = var.ssb_port
     protocol = "tcp"
   }
-
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port = var.ssb_port_ws
+    to_port = var.ssb_port_ws
+    protocol = "tcp"
+  }
   egress {
     from_port = 0
     to_port = 0
@@ -376,6 +380,7 @@ output "nixiform" {
     log_group = aws_cloudwatch_log_group.oracle.name
 
     ssb_port = var.ssb_port
+    ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
   }],
   [for i, server in aws_instance.feed_lb : {
@@ -393,6 +398,7 @@ output "nixiform" {
     log_group = aws_cloudwatch_log_group.oracle.name
 
     ssb_port = var.ssb_port
+    ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
   }],
   [for i, server in aws_instance.ghost : {
@@ -426,6 +432,7 @@ output "nixiform" {
     log_group = aws_cloudwatch_log_group.oracle.name
 
     ssb_port = var.ssb_port
+    ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
   }],
   [for i, server in aws_instance.spectre : {
@@ -461,6 +468,7 @@ output "nixiform" {
     eth_rpc_port = var.eth_rpc_port
 
     ssb_port = var.ssb_port
+    ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
   }],
   [for i, server in aws_instance.monitor : {
@@ -478,6 +486,7 @@ output "nixiform" {
     log_group = aws_cloudwatch_log_group.oracle.name
 
     ssb_port = var.ssb_port
+    ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
   }]
   )

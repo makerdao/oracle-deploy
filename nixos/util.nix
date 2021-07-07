@@ -19,6 +19,7 @@ let
     "relay" = 5;
     "spectre" = 6;
     "ghost" = 7;
+    "monitor" = 8;
   };
   nodeRole = n: toString nodeRoles.${n.type};
 in rec {

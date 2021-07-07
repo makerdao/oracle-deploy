@@ -8,9 +8,8 @@ let
   };
   cfg = config.services.${name};
   settingsFormat = pkgs.formats.json { };
-  UCWordName = "${lib.strings.toUpper (builtins.substring 0 1 name)}${
-      builtins.substring 1 ((builtins.stringLength name) - 1) name
-    }";
+  UCWordName =
+    "${lib.strings.toUpper (builtins.substring 0 1 name)}${builtins.substring 1 ((builtins.stringLength name) - 1) name}";
   secretOriginsJSON = /. + input.meta.rootPath + "/secret/origins.json";
 in {
   options.services.${name} = {
@@ -79,6 +78,10 @@ in {
       type = lib.types.listOf lib.types.str;
       default = [ ];
     };
+    ethereumRpc = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+    };
 
     monitorSettings = lib.mkOption {
       type = settingsFormat.type;
@@ -98,7 +101,7 @@ in {
           from = "0x${util.ethAddr node}";
           keystore = "${util.genKeys node}/keystore";
           password = "${util.genKeys node}/password";
-          rpc = "http://${input.nodes.eth_0.ip}:${toString input.nodes.eth_0.eth_rpc_port}";
+          rpc = lib.mkIf (cfg.ethereumRpc != "") cfg.ethereumRpc;
         };
         rpc = {
           address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";

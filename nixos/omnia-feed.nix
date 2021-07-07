@@ -1,4 +1,4 @@
-{ omnia-module, oracle-suite }:
+{ omnia-module, oracle-suite, serviceOveride ? { } }:
 { pkgs, config, node, lib, input, options, ... }:
 let
   inherit (input) meta;
@@ -24,9 +24,8 @@ let
     feeds = feedEthAddrs input.nodes;
     p2p.privKeySeed = "${peerSeed node}";
     p2p.listenAddrs = [ "/ip4/0.0.0.0/tcp/${toString node.spire_port}" ];
-    p2p.bootstrapAddrs = [
-      "/ip4/${input.nodes.boot_0.ip}/tcp/${toString input.nodes.boot_0.spire_port}/p2p/${peerId input.nodes.boot_0}"
-    ];
+    p2p.bootstrapAddrs =
+      [ "/ip4/${input.nodes.boot_0.ip}/tcp/${toString input.nodes.boot_0.spire_port}/p2p/${peerId input.nodes.boot_0}" ];
   };
 in {
   require = [ omnia-module (import ./omnia-ssb.nix { inherit oracle-suite; }) ];
@@ -44,5 +43,5 @@ in {
     ethereum = eth-config;
     sources = [ "gofer" ];
     transports = [ "transport-spire" ];
-  };
+  } // serviceOveride;
 }
