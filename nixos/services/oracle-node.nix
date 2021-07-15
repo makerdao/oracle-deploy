@@ -40,11 +40,11 @@ in {
     };
     logLevel = lib.mkOption {
       type = lib.types.str;
-      default = "error";
+      default = "info";
     };
     logFormat = lib.mkOption {
       type = lib.types.str;
-      default = "text";
+      default = "json";
     };
     internal.logLevel = lib.mkOption {
       type = lib.types.str;
@@ -73,6 +73,14 @@ in {
     bootstrapAddrs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
+    };
+    feeds = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = util.feedEthAddrs input.nodes;
+    };
+    symbols = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = map (a: a.wat) (lib.importJSON ../contracts.json);
     };
     directPeersAddrs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -103,25 +111,36 @@ in {
           password = "${util.genKeys node}/password";
           rpc = lib.mkIf (cfg.ethereumRpc != "") cfg.ethereumRpc;
         };
-        rpc = {
-          address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
-          disable = cfg.disableRpc;
+        feeds = cfg.feeds;
+        spire = {
+          rpc = {
+            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
+            disable = cfg.disableRpc;
+          };
+          pairs = cfg.symbols;
         };
-        p2p = {
-          listenAddrs = [ "/ip4/${cfg.ip4Addr}/tcp/${toString cfg.tcpPort}" ];
-          privKeySeed = lib.mkIf cfg.staticId "${util.peerSeed node}";
-          disableDiscovery = cfg.disableDiscovery;
-          bootstrapAddrs = cfg.bootstrapAddrs;
-          directPeersAddrs = cfg.directPeersAddrs;
+        ghost = {
+          rpc = {
+            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
+            disable = cfg.disableRpc;
+          };
+          pairs = cfg.symbols;
         };
-        pairs = map (a: a.wat) (lib.importJSON ../contracts.json);
-        feeds = util.feedEthAddrs input.nodes ++ [ "0x1c4f327af51f4f2c9ef9790ea187f2587ba5efcb" ];
-        origins.openexchangerates = {
+        transport = {
+          p2p = {
+            listenAddrs = [ "/ip4/${cfg.ip4Addr}/tcp/${toString cfg.tcpPort}" ];
+            privKeySeed = lib.mkIf cfg.staticId "${util.peerSeed node}";
+            disableDiscovery = cfg.disableDiscovery;
+            bootstrapAddrs = cfg.bootstrapAddrs;
+            directPeersAddrs = cfg.directPeersAddrs;
+          };
+        };
+        gofer.origins.openexchangerates = {
           name = "openexchangerates";
           type = "openexchangerates";
           params = (lib.importJSON secretOriginsJSON).openexchangerates;
         };
-        medianizers = builtins.listToAttrs (map (a: {
+        spectre.medianizers = builtins.listToAttrs (map (a: {
           name = a.wat;
           value = {
             oracle = a.address;
@@ -163,12 +182,12 @@ in {
         RestartSec = 5;
         ExecStart = "${
             pkgs.writeShellScriptBin "start" ''
-              set -u -e -o pipefail
+              set -euo pipefail
               ${oracle-suite}/bin/${app} \
                 --config /etc/${node.name}-${cfg.name}.json \
                 --log.verbosity ${cfg.logLevel} \
                 --log.format ${cfg.logFormat} \
-                agent | ${monitor-bins}/bin/push-spire-output /etc/${node.name}-${cfg.name}-monitoring.json
+                agent 2>&1 | tee >(cat >&2) | ${monitor-bins}/bin/consume-spire-log /etc/${node.name}-${cfg.name}-monitoring.json
             ''
           }/bin/start";
       };

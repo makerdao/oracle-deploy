@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CONFIG_FILE="$1"
+graphiteUrl=$(jq -r '.graphiteUrl' "$CONFIG_FILE")
+graphiteApiKey=$(cat "$(jq -r '.graphiteApiKeyFile' "$CONFIG_FILE")")
+intervalSeconds=$(jq -c '.intervalSeconds' "$CONFIG_FILE")
+env=$(jq -r '.env' "$CONFIG_FILE")
+node=$(jq -r '.node' "$CONFIG_FILE")
+
+function pushToGraphite() {
+	local _metrics
+	_metrics=$(jq -c)
+
+	if [[ -n "$_metrics" ]]
+	then
+		jq -c <<<"$_metrics" >&2
+
+		if [[ -n "$graphiteUrl" ]]
+		then
+			curl --silent --request POST \
+				--header "Authorization: Bearer $graphiteApiKey" \
+				--header "Content-Type: application/json" \
+				--data @- \
+				"$graphiteUrl" <<<"$_metrics"
+		fi
+	fi
+}
+
+while IFS= read -r _data
+do
+	{
+		jq -c 'select(.level=="debug" and .tag=="P2P" and .msg=="Peer score")' <<< "$_data" \
+		| jq -c '{peerID,time,"x-hostID"} as $x|.score[0]|fromjson|.Topics|select(.!=null)|to_entries[]|{topic:.key}+(.value|to_entries[])+$x' \
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metricGroup "peer_score" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
+				name:($service+"."+.peerID+"."+$metricGroup+"."+.key),
+				value:.value,time:(.time|fromdateiso8601),interval:$intervalSeconds,
+				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerId="+.peerID,"peerID="+.peerID,"hostID="+."x-hostID"]
+			}'
+
+		jq -c 'select(.level=="debug" and .tag=="P2P" and .msg=="Peer score")' <<< "$_data" \
+		| jq -c '{peerID,time,"x-hostID"} as $x|.score[0]|fromjson|to_entries[]|select(.value|numbers)+$x' \
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metricGroup "peer_score" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
+				name:($service+"."+.peerID+"."+$metricGroup+"."+.key),
+				value:.value,time:(.time|fromdateiso8601),interval:$intervalSeconds,
+				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerId="+.peerID,"peerID="+.peerID,"hostID="+."x-hostID"]
+			}'
+
+		jq -c 'select(.level=="info" and .tag=="DATASTORE" and .msg=="Price received")' <<< "$_data" \
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metric "feed_price" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
+				name:(.wat+"."+.from+"."+$service+"."+$metric),
+				value:((.val | tonumber) / 1e18),time:(.age|fromdateiso8601),interval:$intervalSeconds,
+				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"feedID="+.from,"feedID="+.from,"feedId="+.from,"symbol="+.wat,"transport="+$service]
+			}'
+
+		jq -c 'select(.level=="info" and .tag=="P2P" and .msg=="Connected peers")' <<< "$_data" \
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metric "peer_count" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
+				name:($service+"."+$metric),
+				value:.peerCount,time:(.time|fromdateiso8601),interval:$intervalSeconds,
+				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"hostID="+."x-hostID"]
+			}'
+	} | jq --compact-output --slurp 'select(.|length > 0)' | pushToGraphite
+done
