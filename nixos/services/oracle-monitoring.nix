@@ -1,4 +1,4 @@
-{ monitor-bins }:
+{ monitor-bins, name ? "monitoring" }:
 { options, config, lib, pkgs, input, node, ... }:
 let
   name = "monitoring";

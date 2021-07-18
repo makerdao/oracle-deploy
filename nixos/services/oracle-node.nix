@@ -1,5 +1,4 @@
-{ name, app ? name }:
-{ oracle-suite, monitor-bins }:
+{ oracle-suite, monitor-bins, name, app ? name }:
 { options, config, lib, pkgs, input, node, ... }:
 let
   util = pkgs.callPackages ../util.nix {
