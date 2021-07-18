@@ -13,7 +13,7 @@ let
   secretOriginsJSON = /. + input.meta.rootPath + "/secret/origins.json";
 in {
   options.services.${name} = {
-    enable = lib.mkEnableOption "${UCWordName} Service";
+    enable = lib.mkEnableOption "Oracle ${UCWordName} Service";
     name = lib.mkOption {
       type = lib.types.str;
       default = name;
@@ -90,18 +90,6 @@ in {
       type = lib.types.str;
       default = "";
     };
-
-    monitorSettings = lib.mkOption {
-      type = settingsFormat.type;
-      default = {
-        graphiteUrl = "https://graphite-us-central1.grafana.net/metrics";
-        graphiteApiKeyFile = config.nixiform.filesOut.graphiteApiKeyFile;
-        intervalSeconds = 60;
-        env = node.env;
-        node = node.name;
-      };
-    };
-    # https://nixos.org/manual/nixos/stable/#sec-settings-nix-representable
     settings = lib.mkOption {
       type = settingsFormat.type;
       default = lib.importJSON "${oracle-suite}/config.json" // {
@@ -171,7 +159,7 @@ in {
 
     systemd.services.${cfg.name} = {
       enable = true;
-      description = "${UCWordName} Agent";
+      description = "Oracle ${UCWordName} Agent";
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
@@ -180,33 +168,17 @@ in {
         Group = cfg.group;
         Restart = "always";
         RestartSec = 5;
-        ExecStart = "${
-            pkgs.writeShellScriptBin "start" ''
-              set -euo pipefail
-              ${oracle-suite}/bin/${app} \
-                --config /etc/${node.name}-${cfg.name}.json \
-                --log.verbosity ${cfg.logLevel} \
-                --log.format ${cfg.logFormat} \
-                agent 2>&1 | tee >(cat >&2) | ${monitor-bins}/bin/consume-spire-log /etc/${node.name}-${cfg.name}-monitoring.json
-            ''
-          }/bin/start";
+        ExecStart = ''
+          ${oracle-suite}/bin/${app} \
+          --config /etc/${node.name}-${cfg.name}.json \
+          --log.verbosity ${cfg.logLevel} \
+          --log.format ${cfg.logFormat} \
+          agent'';
       };
       environment = {
         GOLOG_LOG_LEVEL = cfg.internal.logLevel;
         GOLOG_LOG_FMT = cfg.internal.logFormat;
       };
-    };
-
-    nixiform.filesIn.graphiteApiKeyFile = {
-      path = toString /. + input.meta.rootPath + "/secret/graphite_api_key";
-      user = cfg.user;
-      group = cfg.group;
-    };
-    environment.etc."${node.name}-${cfg.name}-monitoring.json" = {
-      source = settingsFormat.generate "${node.name}-${cfg.name}-monitoring.json" cfg.monitorSettings; # insecure
-      mode = "0400";
-      user = cfg.user;
-      group = cfg.group;
     };
   };
 }
