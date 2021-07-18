@@ -36,7 +36,7 @@ while read -r _data; do
 	_row="$(jq -c <<<"$_data" || true)"
 	if [[ -z "$_row" ]]
 	then
-		echo >&2 "Nothing to parse"
+		echo >&2 "Nothing to parse in: $_row"
 		continue
 	fi
 	{
