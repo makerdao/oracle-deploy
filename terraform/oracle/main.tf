@@ -34,6 +34,24 @@ resource "aws_security_group" "spire" {
   }
 }
 
+resource "aws_security_group" "gofer" {
+  name = "oracle-${var.name}-allow-gofer-sg"
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port = var.gofer_port
+    to_port = var.gofer_port
+    protocol = "tcp"
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "ssb" {
   name = "oracle-${var.name}-allow-ssb-sg"
   ingress {
@@ -165,6 +183,7 @@ resource "aws_instance" "feed" {
   security_groups = [
     aws_security_group.ssh.name,
     aws_security_group.ssb.name,
+    aws_security_group.gofer.name,
     aws_security_group.spire.name
   ]
   root_block_device {
@@ -185,6 +204,7 @@ resource "aws_instance" "feed_lb" {
   security_groups = [
     aws_security_group.ssh.name,
     aws_security_group.ssb.name,
+    aws_security_group.gofer.name,
     aws_security_group.spire.name
   ]
   root_block_device {
@@ -282,6 +302,7 @@ resource "aws_instance" "ghost" {
   key_name = aws_key_pair.nixiform.key_name
   security_groups = [
     aws_security_group.ssh.name,
+    aws_security_group.gofer.name,
     aws_security_group.spire.name
   ]
   root_block_device {
@@ -319,6 +340,7 @@ resource "aws_instance" "monitor" {
   security_groups = [
     aws_security_group.ssh.name,
     aws_security_group.spire.name,
+    aws_security_group.gofer.name,
     aws_security_group.ssb.name,
   ]
   root_block_device {
@@ -382,6 +404,7 @@ output "nixiform" {
     ssb_port = var.ssb_port
     ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
+    gofer_port = var.gofer_port
   }],
   [for i, server in aws_instance.feed_lb : {
     provider = "aws"
@@ -400,6 +423,7 @@ output "nixiform" {
     ssb_port = var.ssb_port
     ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
+    gofer_port = var.gofer_port
   }],
   [for i, server in aws_instance.ghost : {
     provider = "aws"
@@ -416,6 +440,7 @@ output "nixiform" {
     log_group = aws_cloudwatch_log_group.oracle.name
 
     spire_port = var.spire_port
+    gofer_port = var.gofer_port
   }],
   [for i, server in aws_instance.relay : {
     provider = "aws"
@@ -470,6 +495,7 @@ output "nixiform" {
     ssb_port = var.ssb_port
     ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
+    gofer_port = var.gofer_port
   }],
   [for i, server in aws_instance.monitor : {
     provider = "aws"
@@ -488,6 +514,7 @@ output "nixiform" {
     ssb_port = var.ssb_port
     ssb_port_ws = var.ssb_port_ws
     spire_port = var.spire_port
+    gofer_port = var.gofer_port
   }]
   )
 }

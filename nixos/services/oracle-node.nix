@@ -71,15 +71,15 @@ in {
     };
     bootstrapAddrs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ ];
+      default = util.bootMultiAddrs input.nodes;
     };
     feeds = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = util.feedEthAddrs input.nodes;
     };
-    symbols = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = map (a: a.wat) (lib.importJSON ../contracts.json);
+    contracts = lib.mkOption {
+      type = lib.types.listOf lib.types.attrs;
+      default = lib.importJSON ../contracts.json;
     };
     directPeersAddrs = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -104,14 +104,14 @@ in {
             address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
             disable = cfg.disableRpc;
           };
-          pairs = cfg.symbols;
+          pairs = map (a: a.wat) cfg.contracts;
         };
         ghost = {
           rpc = {
             address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
             disable = cfg.disableRpc;
           };
-          pairs = cfg.symbols;
+          pairs = map (a: a.wat) cfg.contracts;
         };
         transport = {
           p2p = {
@@ -122,11 +122,7 @@ in {
             directPeersAddrs = cfg.directPeersAddrs;
           };
         };
-        gofer.origins.openexchangerates = {
-          name = "openexchangerates";
-          type = "openexchangerates";
-          params = (lib.importJSON secretOriginsJSON).openexchangerates;
-        };
+        gofer.origins.openexchangerates = lib.importJSON secretOriginsJSON;
         spectre.medianizers = builtins.listToAttrs (map (a: {
           name = a.wat;
           value = {
@@ -135,7 +131,7 @@ in {
             oracleExpiration = 600;
             msgExpiration = 1800;
           };
-        }) (lib.importJSON ../contracts.json));
+        }) cfg.contracts);
       };
     };
   };

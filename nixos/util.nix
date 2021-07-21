@@ -7,8 +7,9 @@ let
   mapFeeds = mapNodes (n: lib.strings.hasPrefix "feed_" n.name || lib.strings.hasPrefix "ghost_" n.name);
   mapRelays = mapNodes (n: lib.strings.hasPrefix "relay_" n.name || lib.strings.hasPrefix "spectre_" n.name);
   mapEths = mapNodes (n: lib.strings.hasPrefix "eth_" n.name);
+  mapBoots = mapNodes (n: lib.strings.hasPrefix "boot_" n.name);
 
-  hd_seed = /. + input.meta.rootPath + "/secret/hd_seed";
+  hd_seed = /. + input.meta.seedFile;
 
   nodeRoles = {
     "eth" = 0;
@@ -23,10 +24,24 @@ let
   };
   nodeRole = n: toString nodeRoles.${n.type};
 in rec {
+  recursiveMerge = attrList:
+    with lib;
+    let
+      f = attrPath:
+        zipAttrsWith (n: values:
+          if tail values == [ ] then
+            head values
+          else if all isList values then
+            unique (concatLists values)
+          else if all isAttrs values then
+            f (attrPath ++ [ n ]) values
+          else
+            last values);
+    in f [ ] attrList;
+
   nodeSecretPath = node: p: "${toString /. + input.meta.rootPath + "/secret"}/${node.name}/${p}";
   writeJSON = name: attrs: pkgs.writeText name (builtins.toJSON attrs);
-  ethAddr = n:
-    (lib.importJSON "${genKeys n}/keystore/${toString n.env_idx}-${nodeRole n}-${toString n.idx}.json").address;
+  ethAddr = n: (lib.importJSON "${genKeys n}/keystore/${toString n.env_idx}-${nodeRole n}-${toString n.idx}.json").address;
   peerId = n: (lib.importJSON "${genPeer n}").id;
   peerSeed = n: (lib.importJSON "${genPeer n}").seed;
   ssbId = n: (lib.importJSON "${genSsb n}").id;
@@ -37,6 +52,7 @@ in rec {
   });
   feedEthAddrs = mapFeeds (n: "0x${ethAddr n}");
   relayEthAddrs = mapRelays (n: "0x${ethAddr n}");
+  bootMultiAddrs = mapBoots (n: "/ip4/${n.ip}/tcp/${toString n.spire_port}/p2p/${peerId n}");
 
   ethToSsb = nodes:
     builtins.listToAttrs (map (a: {
@@ -69,9 +85,7 @@ in rec {
         set -e
         mkdir -p $out/keystore
         echo "" > $out/password
-        cat ${hd_seed} | keeman derive --verbose --env ${toString n.env_idx} --role ${nodeRole n} --node ${
-          toString n.idx
-        } \
+        cat ${hd_seed} | keeman derive --verbose --env ${toString n.env_idx} --role ${nodeRole n} --node ${toString n.idx} \
         | jq '.eth.keystore' -c > "$out/keystore/${toString n.env_idx}-${nodeRole n}-${toString n.idx}.json"
       '';
       fixupPhase = "true";
@@ -84,9 +98,7 @@ in rec {
       buildInputs = [ oracle-suite pkgs.jq ];
       installPhase = ''
         set -e
-        cat ${hd_seed} | keeman derive --verbose --env ${toString n.env_idx} --role ${nodeRole n} --node ${
-          toString n.idx
-        } \
+        cat ${hd_seed} | keeman derive --verbose --env ${toString n.env_idx} --role ${nodeRole n} --node ${toString n.idx} \
         | jq '.p2p' -c > $out
       '';
       fixupPhase = "true";
@@ -99,9 +111,7 @@ in rec {
       buildInputs = [ oracle-suite pkgs.jq ];
       installPhase = ''
         set -e
-        cat ${hd_seed} | keeman derive --verbose --env ${toString n.env_idx} --role ${nodeRole n} --node ${
-          toString n.idx
-        } \
+        cat ${hd_seed} | keeman derive --verbose --env ${toString n.env_idx} --role ${nodeRole n} --node ${toString n.idx} \
         | jq '.ssb' -c > $out
       '';
       fixupPhase = "true";

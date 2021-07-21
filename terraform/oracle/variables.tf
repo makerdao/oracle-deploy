@@ -31,8 +31,14 @@ variable "spire_port" {
   default = 44008
 }
 
+variable "gofer_port" {
+  description = "Gofer public port"
+  type = number
+  default = 44100
+}
+
 variable "ssh_key" {
-  description = "SSH key to uses as authorizition to instances"
+  description = "SSH public key VALUE to use as authorization to instances"
   type = string
 }
 

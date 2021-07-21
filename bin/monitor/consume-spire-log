@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CONFIG_FILE="${1:-${CONFIG_FILE:-""}}"
+export CONFIG_FILE="${1:-${CONFIG_FILE:-""}}"
 
 graphiteUrl=$(jq -r '.graphiteUrl' "$CONFIG_FILE")
 graphiteApiKey=$(jq -r '.graphiteApiKey' "$CONFIG_FILE")
@@ -10,35 +10,34 @@ env=$(jq -r '.env' "$CONFIG_FILE")
 node=$(jq -r '.node' "$CONFIG_FILE")
 
 function pushToGraphite() {
-	if [[ $(stat -c%s "$1") -eq 0 ]]
-	then
-		echo >&2 "Nothing to push to Graphite"
+	if [[ $(stat -c%s "$1") -eq 0 ]];	then
+		echo >&2 "Nothing to push to Graphite: $1"
 		return
 	fi
 
-	if [[ -n "$graphiteUrl" ]]; then
-		echo >&2 "Uploading $1 to Grafana"
-		jq -c -s < "$1" | curl --silent --request POST \
-			--header "Authorization: Bearer $graphiteApiKey" \
-			--header "Content-Type: application/json" \
-			--data @- \
-			"$graphiteUrl"
-	else
-		echo >&2 "Skipping Graphite upload ($1)"
+	if [[ -z "$graphiteUrl" ]]; then
+		echo >&2 "Skipping Graphite upload: $1"
+		return
 	fi
+
+	echo >&2 "Uploading to Graphite: $1"
+	jq -c -s < "$1" | curl --silent --request POST \
+		--header "Authorization: Bearer $graphiteApiKey" \
+		--header "Content-Type: application/json" \
+		--data @- \
+		"$graphiteUrl"
 }
 
 _until="$(date --utc "+%Y-%m-%d %H:%M:00 UTC")"
 _since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:00 UTC")"
-
 _metrics=$(mktemp)
 while read -r _data; do
 	_row="$(jq -c <<<"$_data" || true)"
-	if [[ -z "$_row" ]]
-	then
+	if [[ -z "$_row" ]]; then
 		echo >&2 "Nothing to parse in: $_row"
 		continue
 	fi
+
 	{
 		jq -c 'select(.level=="debug" and .tag=="P2P" and .msg=="Peer score")' <<< "$_row" \
 			| jq -c '{peerID,time,"x-hostID"} as $x|.score[0]|fromjson|.Topics|select(.!=null)|to_entries[]|{topic:.key}+(.value|to_entries[])+$x' \

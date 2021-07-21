@@ -6,7 +6,7 @@ let
     inherit oracle-suite;
     inherit input;
   })
-    nodeSecretPath ethAddr writeJSON feedEthAddrs genCaps genKeys peerSeed peerId;
+    nodeSecretPath ethAddr writeJSON feedEthAddrs genCaps genKeys peerSeed peerId bootMultiAddrs recursiveMerge;
   sec = p: {
     path = nodeSecretPath node p;
     user = "omnia";
@@ -19,29 +19,42 @@ let
     keystore = "${keys}/keystore";
     password = "${keys}/password";
   };
-  spire-config = (lib.importJSON ./spire.json) // {
+  default-config = lib.importJSON "${oracle-suite}/config.json";
+  spire-config = {
+    inherit (default-config) spire ethereum feeds transport;
+  } // {
     ethereum = eth-config;
     feeds = feedEthAddrs input.nodes;
-    p2p.privKeySeed = "${peerSeed node}";
-    p2p.listenAddrs = [ "/ip4/0.0.0.0/tcp/${toString node.spire_port}" ];
-    p2p.bootstrapAddrs =
-      [ "/ip4/${input.nodes.boot_0.ip}/tcp/${toString input.nodes.boot_0.spire_port}/p2p/${peerId input.nodes.boot_0}" ];
+    transport.p2p.privKeySeed = "${peerSeed node}";
+    transport.p2p.listenAddrs = [ "/ip4/0.0.0.0/tcp/${toString node.spire_port}" ];
+    transport.p2p.bootstrapAddrs = bootMultiAddrs input.nodes;
+  };
+  gofer-config = {
+    gofer = {
+      rpc = default-config.gofer.rpc;
+      priceModels = default-config.gofer.priceModels;
+      origins = lib.importJSON (/. + input.meta.rootPath + "/secret/origins.json");
+    };
   };
 in {
   require = [ omnia-module (import ./omnia-ssb.nix { inherit oracle-suite; }) ];
 
   networking.firewall.allowedTCPPorts = [ node.spire_port ];
-  services.omnia = {
-    enable = true;
-    mode = "feed";
-    options = {
-      debug = false;
-      verbose = true;
-      interval = 60;
-      spireConfig = writeJSON "spire.json" spire-config;
-    };
-    ethereum = eth-config;
-    sources = [ "gofer" ];
-    transports = [ "transport-spire" ];
-  } // serviceOveride;
+  services.omnia = recursiveMerge [
+    {
+      enable = true;
+      mode = "feed";
+      options = {
+        debug = false;
+        verbose = true;
+        interval = 60;
+        spireConfig = writeJSON "spire.json" spire-config;
+        goferConfig = writeJSON "gofer.json" gofer-config;
+      };
+      ethereum = eth-config;
+      sources = [ "gofer" ];
+      transports = [ "transport-spire" ];
+    }
+    serviceOveride
+  ];
 }

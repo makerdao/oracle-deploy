@@ -24,7 +24,7 @@ in rec {
   };
 
   shell = { terraform ? pkgs.terraform, extraShellHook ? "", extraBuildInputs ? [ ], nixos ? import sources.nixos { }
-    , pkgs ? import sources.nixpkgs { }, rootDir ? toString ../. }:
+    , pkgs ? import sources.nixpkgs { }, rootDir ? toString ../., sshKeyName ? "ssh_key" }:
     pkgs.mkShell rec {
       name = "oracle-nixiform-shell";
 
@@ -32,7 +32,7 @@ in rec {
 
       ROOT_DIR = rootDir;
       SECRET_DIR = "${ROOT_DIR}/secret";
-      SSH_KEY = "${ROOT_DIR}/secret/ssh_key";
+      SSH_KEY = "${SECRET_DIR}/${sshKeyName}";
 
       shellHook = ''
         export NIX_PATH="nixpkgs=${nixos.path}"
