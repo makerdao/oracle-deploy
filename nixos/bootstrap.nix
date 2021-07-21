@@ -1,7 +1,7 @@
 { oracle-suite, monitor-bins }:
 { options, config, lib, pkgs, input, node, ... }: {
   require = [
-    (import ./services/oracle-node.nix {
+    (import ./services/oracle-suite.nix {
       name = "spire";
       inherit oracle-suite monitor-bins;
     })

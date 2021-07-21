@@ -1,4 +1,4 @@
-{ omnia-module, oracle-suite, serviceOveride ? { } }:
+{ omnia-module, oracle-suite, omniaOverride ? { } }:
 { pkgs, config, input, node, lib, ... }:
 let
   inherit (input) meta;
@@ -49,16 +49,8 @@ in {
       feeds = feedEthAddrs input.nodes;
       transports = [ "transport-spire" ];
       services.scuttlebotIdMap = ethToSsb input.nodes;
-      pairs = builtins.listToAttrs (map (a: {
-        name = a.wat;
-        value = {
-          oracle = a.address;
-          oracleSpread = 0.5;
-          oracleExpiration = 600;
-          msgExpiration = 1800;
-        };
-      }) (lib.importJSON ./contracts.json));
+      pairs = [ ];
     }
-    serviceOveride
+    omniaOverride
   ];
 }

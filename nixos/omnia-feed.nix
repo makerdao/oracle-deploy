@@ -1,4 +1,4 @@
-{ omnia-module, oracle-suite, serviceOveride ? { } }:
+{ omnia-module, oracle-suite, omniaOverride ? { } }:
 { pkgs, config, node, lib, input, options, ... }:
 let
   inherit (input) meta;
@@ -44,6 +44,7 @@ in {
     {
       enable = true;
       mode = "feed";
+      pairs = [ ];
       options = {
         debug = false;
         verbose = true;
@@ -52,9 +53,9 @@ in {
         goferConfig = writeJSON "gofer.json" gofer-config;
       };
       ethereum = eth-config;
-      sources = [ "gofer" ];
+      sources = [ "gofer" "setzer" ];
       transports = [ "transport-spire" ];
     }
-    serviceOveride
+    omniaOverride
   ];
 }

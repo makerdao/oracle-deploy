@@ -122,7 +122,7 @@ in {
             directPeersAddrs = cfg.directPeersAddrs;
           };
         };
-        gofer.origins.openexchangerates = lib.importJSON secretOriginsJSON;
+        gofer.origins = lib.importJSON secretOriginsJSON; # this clears price models
         spectre.medianizers = builtins.listToAttrs (map (a: {
           name = a.wat;
           value = {
