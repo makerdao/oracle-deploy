@@ -1,4 +1,4 @@
-{ omnia-module, oracle-suite, omniaOverride ? { } }:
+{ omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { } }:
 { pkgs, config, input, node, lib, ... }:
 let
   inherit (input) meta;
@@ -19,7 +19,6 @@ let
     from = "0x${ethAddr node}";
     keystore = "${keys}/keystore";
     password = "${keys}/password";
-    #    network = "http://${input.nodes.eth_0.ip}:${toString input.nodes.eth_0.eth_rpc_port}";
   };
   default-config = lib.importJSON "${oracle-suite}/config.json";
   spire-config = {
@@ -35,7 +34,7 @@ in {
   require = [ omnia-module (import ./omnia-ssb.nix { inherit oracle-suite; }) ];
 
   networking.firewall.allowedTCPPorts = [ node.spire_port ];
-  services.omnia = recursiveMerge [
+  services.omnia = (recursiveMerge [
     {
       enable = true;
       mode = "relay";
@@ -51,6 +50,6 @@ in {
       services.scuttlebotIdMap = ethToSsb input.nodes;
       pairs = [ ];
     }
-    omniaOverride
-  ];
+    omniaMerge
+  ]) // omniaOverride;
 }

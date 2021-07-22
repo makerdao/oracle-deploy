@@ -46,7 +46,7 @@ in with lib; {
     };
     contracts = mkOption {
       type = types.listOf types.attrs;
-      default = importJSON ./contracts.json;
+      default = [ ];
     };
     feeds = mkOption {
       type = types.listOf types.attrs;

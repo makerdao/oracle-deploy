@@ -1,4 +1,4 @@
-{ oracle-suite }:
+{ oracle-suite, contracts ? { } }:
 { pkgs, config, input, node, lib, ... }:
 let
   inherit (builtins) fromJSON listToAttrs;
@@ -25,7 +25,7 @@ let
   dataDir = "/var/lib/testnet";
   feeds = concatStringsSep " " (feedEthAddrs input.nodes);
 
-  wats = concatMapStringsSep " " (x: x.wat) (importJSON ./contracts.json);
+  wats = concatMapStringsSep " " (x: x.wat) contracts;
 in {
   require = [ ./geth-testnet.nix ];
 

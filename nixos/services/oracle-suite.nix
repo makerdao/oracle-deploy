@@ -79,7 +79,7 @@ in {
     };
     contracts = lib.mkOption {
       type = lib.types.listOf lib.types.attrs;
-      default = lib.importJSON ../contracts.json;
+      default = [ ];
     };
     directPeersAddrs = lib.mkOption {
       type = lib.types.listOf lib.types.str;

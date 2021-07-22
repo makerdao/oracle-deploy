@@ -8,6 +8,7 @@ graphiteApiKey=$(jq -r '.graphiteApiKey' "$CONFIG_FILE")
 intervalSeconds=$(jq -c '.intervalSeconds' "$CONFIG_FILE")
 env=$(jq -r '.env' "$CONFIG_FILE")
 node=$(jq -r '.node' "$CONFIG_FILE")
+lastRunTimeFile="${HOME}/.lastRunTime"
 
 function pushToGraphite() {
 	if [[ $(stat -c%s "$1") -eq 0 ]];	then
@@ -28,8 +29,16 @@ function pushToGraphite() {
 		"$graphiteUrl"
 }
 
-_until="$(date --utc "+%Y-%m-%d %H:%M:00 UTC")"
-_since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:00 UTC")"
+_until="$(date --utc "+%Y-%m-%d %H:%M:%S UTC")"
+if [[ -f "$lastRunTimeFile" ]]
+then
+	_since="$(cat "$lastRunTimeFile")"
+else
+	_since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:00 UTC")"
+fi
+echo "$_until" > "$lastRunTimeFile"
+echo >&2 "Parsing since $_since until $_until"
+
 _metrics=$(mktemp)
 while read -r _data; do
 	_row="$(jq -c <<<"$_data" || true)"
@@ -50,7 +59,7 @@ while read -r _data; do
 				'{
 				name:($service+"."+.peerID+"."+$metricGroup+"."+.key),
 				value:.value,time:(.time|fromdateiso8601),interval:$intervalSeconds,
-				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerId="+.peerID,"peerID="+.peerID,"hostID="+."x-hostID"]
+				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerID="+.peerID,"hostID="+."x-hostID"]
 			}'
 
 		jq -c 'select(.level=="debug" and .tag=="P2P" and .msg=="Peer score")' <<< "$_row" \
@@ -64,7 +73,7 @@ while read -r _data; do
 				'{
 				name:($service+"."+.peerID+"."+$metricGroup+"."+.key),
 				value:.value,time:(.time|fromdateiso8601),interval:$intervalSeconds,
-				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerId="+.peerID,"peerID="+.peerID,"hostID="+."x-hostID"]
+				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerID="+.peerID,"hostID="+."x-hostID"]
 			}'
 
 		jq -c 'select(.level=="info" and .tag=="DATASTORE" and .msg=="Price received")' <<< "$_row" \
@@ -77,7 +86,7 @@ while read -r _data; do
 				'{
 				name:(.wat+"."+.from+"."+$service+"."+$metric),
 				value:((.val | tonumber) / 1e18),time:(.age|fromdateiso8601),interval:$intervalSeconds,
-				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"feedID="+.from,"feedID="+.from,"feedId="+.from,"symbol="+.wat,"transport="+$service]
+				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"feedID="+.from,"symbol="+.wat,"transport="+$service]
 			}'
 
 		jq -c 'select(.level=="info" and .tag=="P2P" and .msg=="Connected peers")' <<< "$_row" \

@@ -1,4 +1,4 @@
-{ omnia-module, oracle-suite, omniaOverride ? { } }:
+{ omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { } }:
 { pkgs, config, node, lib, input, options, ... }:
 let
   inherit (input) meta;
@@ -40,7 +40,7 @@ in {
   require = [ omnia-module (import ./omnia-ssb.nix { inherit oracle-suite; }) ];
 
   networking.firewall.allowedTCPPorts = [ node.spire_port ];
-  services.omnia = recursiveMerge [
+  services.omnia = (recursiveMerge [
     {
       enable = true;
       mode = "feed";
@@ -56,6 +56,6 @@ in {
       sources = [ "gofer" "setzer" ];
       transports = [ "transport-spire" ];
     }
-    omniaOverride
-  ];
+    omniaMerge
+  ]) // omniaOverride;
 }

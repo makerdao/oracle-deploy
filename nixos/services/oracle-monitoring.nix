@@ -29,6 +29,10 @@ in {
       type = lib.types.int;
       default = 60;
     };
+    home = lib.mkOption {
+      type = lib.types.path;
+      default = "/var/lib/${cfg.user}";
+    };
     settings = lib.mkOption {
       type = settingsFormat.type;
       default = {
@@ -43,9 +47,12 @@ in {
   };
   config = lib.mkIf cfg.enable {
     users.users.${cfg.user} = {
-      isSystemUser = true;
       group = cfg.group;
       extraGroups = [ "systemd-journal" ];
+      description = "Oracle ${UCWordName} User";
+      isSystemUser = true;
+      home = cfg.home;
+      createHome = true;
     };
     users.groups.${cfg.group} = { };
     systemd.services.${name} = {
@@ -56,6 +63,7 @@ in {
         ExecStart = "${monitor-bins}/bin/consume-spire-log";
         User = cfg.user;
         Group = cfg.group;
+        WorkingDirectory = cfg.home;
       };
       environment = { CONFIG_FILE = settingsFormat.generate "${node.name}-${cfg.name}.json" cfg.settings; };
     };
