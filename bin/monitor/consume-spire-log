@@ -18,6 +18,7 @@ function pushToGraphite() {
 
 	if [[ -z "$graphiteUrl" ]]; then
 		echo >&2 "Skipping Graphite upload: $1"
+		jq -c < "$1" >&2
 		return
 	fi
 
@@ -29,13 +30,17 @@ function pushToGraphite() {
 		"$graphiteUrl"
 }
 
-_until="$(date --utc "+%Y-%m-%d %H:%M:%S UTC")"
-if [[ -f "$lastRunTimeFile" ]]
-then
-	_since="$(cat "$lastRunTimeFile")"
-else
-	_since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:00 UTC")"
-fi
+#_until="$(date --utc "+%Y-%m-%d %H:%M:%S UTC")"
+#if [[ -f "$lastRunTimeFile" ]]
+#then
+#	_since="$(cat "$lastRunTimeFile")"
+#else
+#	_since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:00 UTC")"
+#fi
+
+_until="$(date --utc "+%Y-%m-%d %H:%M:00 UTC")"
+_since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:00 UTC")"
+
 echo "$_until" > "$lastRunTimeFile"
 echo >&2 "Parsing since $_since until $_until"
 
@@ -49,54 +54,54 @@ while read -r _data; do
 
 	{
 		jq -c 'select(.level=="debug" and .tag=="P2P" and .msg=="Peer score")' <<< "$_row" \
-			| jq -c '{peerID,time,"x-hostID"} as $x|.score[0]|fromjson|.Topics|select(.!=null)|to_entries[]|{topic:.key}+(.value|to_entries[])+$x' \
-			| jq -c \
-				--arg env "$env" \
-				--arg node "$node" \
-				--arg service "spire" \
-				--arg metricGroup "peer_score" \
-				--argjson intervalSeconds "$intervalSeconds" \
-				'{
+		| jq -c '{peerID,time,"x-hostID"} as $x|.score[0]|fromjson|.Topics|select(.!=null)|to_entries[]|{topic:.key}+(.value|to_entries[])+$x' \
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metricGroup "peer_score" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
 				name:($service+"."+.peerID+"."+$metricGroup+"."+.key),
 				value:.value,time:(.time|fromdateiso8601),interval:$intervalSeconds,
 				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerID="+.peerID,"hostID="+."x-hostID"]
 			}'
 
 		jq -c 'select(.level=="debug" and .tag=="P2P" and .msg=="Peer score")' <<< "$_row" \
-			| jq -c '{peerID,time,"x-hostID"} as $x|.score[0]|fromjson|to_entries[]|select(.value|numbers)+$x' \
-			| jq -c \
-				--arg env "$env" \
-				--arg node "$node" \
-				--arg service "spire" \
-				--arg metricGroup "peer_score" \
-				--argjson intervalSeconds "$intervalSeconds" \
-				'{
+		| jq -c '{peerID,time,"x-hostID"} as $x|.score[0]|fromjson|to_entries[]|select(.value|numbers)+$x' \
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metricGroup "peer_score" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
 				name:($service+"."+.peerID+"."+$metricGroup+"."+.key),
 				value:.value,time:(.time|fromdateiso8601),interval:$intervalSeconds,
 				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+.key,"peerID="+.peerID,"hostID="+."x-hostID"]
 			}'
 
 		jq -c 'select(.level=="info" and .tag=="DATASTORE" and .msg=="Price received")' <<< "$_row" \
-			| jq -c \
-				--arg env "$env" \
-				--arg node "$node" \
-				--arg service "spire" \
-				--arg metric "feed_price" \
-				--argjson intervalSeconds "$intervalSeconds" \
-				'{
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metric "feed_price" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
 				name:(.wat+"."+.from+"."+$service+"."+$metric),
 				value:((.val | tonumber) / 1e18),time:(.age|fromdateiso8601),interval:$intervalSeconds,
 				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"feedID="+.from,"symbol="+.wat,"transport="+$service]
 			}'
 
 		jq -c 'select(.level=="info" and .tag=="P2P" and .msg=="Connected peers")' <<< "$_row" \
-			| jq -c \
-				--arg env "$env" \
-				--arg node "$node" \
-				--arg service "spire" \
-				--arg metric "peer_count" \
-				--argjson intervalSeconds "$intervalSeconds" \
-				'{
+		| jq -c \
+			--arg env "$env" \
+			--arg node "$node" \
+			--arg service "spire" \
+			--arg metric "peer_count" \
+			--argjson intervalSeconds "$intervalSeconds" \
+			'{
 				name:($service+"."+$metric),
 				value:.peerCount,time:(.time|fromdateiso8601),interval:$intervalSeconds,
 				tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"hostID="+."x-hostID"]
