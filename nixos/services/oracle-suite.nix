@@ -123,8 +123,10 @@ in {
             directPeersAddrs = cfg.directPeersAddrs;
           };
         };
-        gofer.priceModels = default-config.gofer.priceModels; # this clears price models
-        gofer.origins = lib.importJSON secretOriginsJSON; # this clears price models
+        gofer = {
+          priceModels = default-config.gofer.priceModels;
+          origins = lib.importJSON secretOriginsJSON;
+        };
         spectre.medianizers = builtins.listToAttrs (map (a: {
           name = a.wat;
           value = {

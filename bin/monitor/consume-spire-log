@@ -92,6 +92,47 @@ function prepareMetrics() {
 					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"feedID="+.from,"symbol="+.wat,"transport="+$service]
 				}'
 			;;
+		"Received invalid price")
+			jq -c <<< "$2" \
+				--arg env "$env" \
+				--arg node "$node" \
+				--arg service "spire" \
+				--arg metric "invalid_price" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+					name:(.wat+"."+.from+"."+$service+"."+$metric),
+					value:((.val | tonumber) / 1e18),time:(.age|fromdateiso8601),interval:$intervalSeconds,
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"feedID="+.from,"symbol="+.wat,"transport="+$service]
+				}'
+			;;
+		"The price message was ignored")
+			jq -c <<< "$2" \
+				--arg env "$env" \
+				--arg node "$node" \
+				--arg service "spire" \
+				--arg metric "ignored_price" \
+				--argjson ts "$(date +%s)" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+					name:(.from+"."+$service+"."+$metric),
+					value:1,time:$ts,interval:$intervalSeconds,
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"peerID="+.peerID,"transport="+$service]
+				}'
+			;;
+		"The price message was rejected")
+			jq -c <<< "$2" \
+				--arg env "$env" \
+				--arg node "$node" \
+				--arg service "spire" \
+				--arg metric "rejected_price" \
+				--argjson ts "$(date +%s)" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+					name:(.from+"."+$service+"."+$metric),
+					value:1,time:$ts,interval:$intervalSeconds,
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"peerID="+.peerID,"transport="+$service]
+				}'
+			;;
 	esac
 }
 
