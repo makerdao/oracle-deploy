@@ -1,4 +1,4 @@
-{ oracle-suite, monitor-bins, name, app ? name }:
+{ oracle-suite, name, app ? name }:
 { options, config, lib, pkgs, input, node, ... }:
 let
   util = pkgs.callPackages ../util.nix {
@@ -10,6 +10,7 @@ let
   UCWordName =
     "${lib.strings.toUpper (builtins.substring 0 1 name)}${builtins.substring 1 ((builtins.stringLength name) - 1) name}";
   secretOriginsJSON = /. + input.meta.rootPath + "/secret/origins.json";
+  default-config = lib.importJSON "${oracle-suite}/config.json";
 in {
   options.services.${name} = {
     enable = lib.mkEnableOption "Oracle ${UCWordName} Service";
@@ -91,7 +92,7 @@ in {
     };
     settings = lib.mkOption {
       type = settingsFormat.type;
-      default = lib.importJSON "${oracle-suite}/config.json" // {
+      default = default-config // {
         ethereum = {
           from = "0x${util.ethAddr node}";
           keystore = "${util.genKeys node}/keystore";
@@ -122,6 +123,7 @@ in {
             directPeersAddrs = cfg.directPeersAddrs;
           };
         };
+        gofer.priceModels = default-config.gofer.priceModels; # this clears price models
         gofer.origins = lib.importJSON secretOriginsJSON; # this clears price models
         spectre.medianizers = builtins.listToAttrs (map (a: {
           name = a.wat;
@@ -141,7 +143,7 @@ in {
 
     environment.etc."${node.name}-${cfg.name}.json" = {
       source = settingsFormat.generate "${node.name}-${cfg.name}.json" cfg.settings; # insecure
-      mode = "0400";
+      mode = "0440";
       user = cfg.user;
       group = cfg.group;
     };

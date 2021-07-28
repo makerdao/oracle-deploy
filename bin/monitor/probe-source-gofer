@@ -1,27 +1,24 @@
 #!/usr/bin/env bash
 set -u -e -o pipefail
-
-declare -A _symbolMap
-_symbolMap["BTCUSD"]="BTC/USD"
-_symbolMap["ETHUSD"]="ETH/USD"
-
-_getSymbol() {
-	local _id="$1"
-	if [[ ${_symbolMap["$_id"]+_exists} ]]; then
-		echo "${_symbolMap["$_id"]}"
-	else
-		echo "$_id"
-	fi
-}
-
-echo "Probing Gofer" >&2
+echo >&2 "Probing Gofer"
 
 cat | while read -r line
 do
-  symbol=$(_getSymbol "$(jq -r .symbol <<<"$line")")
+  wat="$(jq -r '.wat' <<<"$line")"
+  symbol=$(jq -r '.symbol' <<<"$line")
+  if [[ -z "$wat" ]] || [[ -z "$symbol" ]]; then
+  	continue
+	fi
+
+	price="$(gofer --config "$GOFER_CONFIG" price "$symbol")"
+	price="$(jq -c '.price' <<< "$price" || true)"
+	if [[ -z "$price" ]]; then
+		echo >&2 "skip: $symbol"
+		continue
+	fi
   jq --null-input --compact-output \
-    --arg symbol "$symbol" \
-    --arg price "$(gofer --config "$GOFER_CONFIG" price "$symbol" 2>/dev/null | jq '.price')" \
+    --arg wat "$wat" \
+    --arg price "$price" \
     --argjson ts "$(date +%s)" \
-    '{symbol:$symbol,price:$price,ts:$ts}'
+    '{wat:$wat,price:$price,ts:$ts}'
 done

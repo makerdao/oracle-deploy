@@ -1,7 +1,6 @@
 { monitor-bins, name ? "monitoring" }:
 { options, config, lib, pkgs, input, node, ... }:
 let
-  name = "monitoring";
   cfg = config.services.${name};
   settingsFormat = pkgs.formats.json { };
   UCWordName =
@@ -12,6 +11,10 @@ in {
     name = lib.mkOption {
       type = lib.types.str;
       default = name;
+    };
+    executable = lib.mkOption {
+      type = lib.types.str;
+      default = "";
     };
     user = lib.mkOption {
       type = lib.types.str;
@@ -33,6 +36,19 @@ in {
       type = lib.types.path;
       default = "/var/lib/${cfg.user}";
     };
+    ethRpcUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+    };
+    grepMessage = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+    };
+    contracts = lib.mkOption {
+      type = lib.types.listOf lib.types.attrs;
+      default = [ ];
+    };
+
     settings = lib.mkOption {
       type = settingsFormat.type;
       default = {
@@ -42,6 +58,9 @@ in {
         intervalSeconds = cfg.intervalSeconds;
         env = node.env;
         node = node.name;
+        ethRpcUrl = cfg.ethRpcUrl;
+        contracts = cfg.contracts;
+        grepMessage = cfg.grepMessage;
       };
     };
   };
@@ -60,12 +79,16 @@ in {
       description = "Oracle ${UCWordName}";
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${monitor-bins}/bin/consume-spire-log";
+        ExecStart = "${monitor-bins}/bin/${cfg.executable}";
         User = cfg.user;
         Group = cfg.group;
         WorkingDirectory = cfg.home;
       };
-      environment = { CONFIG_FILE = settingsFormat.generate "${node.name}-${cfg.name}.json" cfg.settings; };
+      environment = {
+        CONFIG_FILE = settingsFormat.generate "${node.name}-${cfg.name}.json" cfg.settings;
+        GOFER_CONFIG = "/etc/${node.name}-gofer.json";
+        SPIRE_CONFIG = "/etc/${node.name}-spire.json";
+      };
     };
     systemd.timers.${name} = {
       enable = true;
