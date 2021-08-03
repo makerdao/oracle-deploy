@@ -149,7 +149,7 @@ fi
 echo "$_until" > "$lastRunTimeFile"
 
 _journalctlCall=(journalctl --no-pager --output=cat --since="$_since" --until="$_until" --unit=spire.service --grep="\"msg\":\"$MSG")
-echo >&2 "Call: ${_journalctlCall[*]}"
+echo >&2 ">>> ${_journalctlCall[*]}"
 
 _metrics=$(mktemp)
 while read -r _data; do

@@ -40,7 +40,8 @@ in {
       mode = "relay";
       options = {
         debug = false;
-        verbose = true;
+        verbose = false;
+        logFormat = "text";
         interval = 60;
         spireConfig = writeJSON "spire.json" spire-config;
       };

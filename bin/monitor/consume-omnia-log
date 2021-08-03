@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export CONFIG_FILE="${1:-${CONFIG_FILE:-""}}"
+
+graphiteUrl=$(jq -r '.graphiteUrl' "$CONFIG_FILE")
+graphiteApiKey=$(jq -r '.graphiteApiKey' "$CONFIG_FILE")
+intervalSeconds=$(jq -c '.intervalSeconds' "$CONFIG_FILE")
+env=$(jq -r '.env' "$CONFIG_FILE")
+node=$(jq -r '.node' "$CONFIG_FILE")
+grepMessage=$(jq -r '.grepMessage' "$CONFIG_FILE")
+lastRunTimeFile="${HOME}/.lastRunTime"
+
+MSG="${2:-${grepMessage:-""}}"
+if [[ -z "$MSG" ]]; then
+	echo >&2 "Empty grepMessage"
+	exit 0
+fi
+
+function pushToGraphite() {
+	if [[ $(stat -c%s "$1") -eq 0 ]];	then
+		echo >&2 "Nothing to push to Graphite: $1"
+		return
+	fi
+
+	if [[ -z "$graphiteUrl" ]]; then
+		echo >&2 "Skipping Graphite upload: $1"
+		return
+	fi
+
+	echo >&2 "Uploading to Graphite: $1"
+	jq -c -s < "$1" | curl --silent --request POST \
+		--header "Authorization: Bearer $graphiteApiKey" \
+		--header "Content-Type: application/json" \
+		--data @- \
+		"$graphiteUrl"
+}
+
+function prepareMetrics() {
+	case "$1" in
+		"Transaction receipt")
+			jq <<< "$2" -c \
+				--arg env "$env" \
+				--arg node "$node" \
+				--arg service "omnia" \
+				--arg metricGroup "gas" \
+				--arg metric "cost" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+					name:($env+"."+$node+"."+$service+"."+$metricGroup+"."+$metric),
+					value:((.params.gasPrice|tonumber)*(.params.gasUsed|tonumber)/1e18),time:.time,interval:$intervalSeconds,
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+$metric]
+				}'
+			jq <<< "$2" -c \
+				--arg env "$env" \
+				--arg node "$node" \
+				--arg service "omnia" \
+				--arg metricGroup "gas" \
+				--arg metric "price" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+					name:($env+"."+$node+"."+$service+"."+$metricGroup+"."+$metric),
+					value:((.params.gasPrice|tonumber)/1e9),time:.time,interval:$intervalSeconds,
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+$metric]
+				}'
+			jq <<< "$2" -c \
+				--arg env "$env" \
+				--arg node "$node" \
+				--arg service "omnia" \
+				--arg metricGroup "gas" \
+				--arg metric "used" \
+				--argjson intervalSeconds "$intervalSeconds" \
+				'{
+					name:($env+"."+$node+"."+$service+"."+$metricGroup+"."+$metric),
+					value:.params.gasUsed|tonumber,time:.time,interval:$intervalSeconds,
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+$metric]
+				}'
+			;;
+	esac
+}
+#_until="$(date --utc "+%Y-%m-%d %H:%M:00 UTC")"
+#_since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:00 UTC")"
+
+_until="$(date --utc "+%Y-%m-%d %H:%M:%S UTC")"
+if [[ -f "$lastRunTimeFile" ]]
+then
+	_since="$(cat "$lastRunTimeFile")"
+else
+	_since="$(date --utc --date="$_until -60 sec" "+%Y-%m-%d %H:%M:%S UTC")"
+fi
+echo "$_until" > "$lastRunTimeFile"
+
+_journalctlCall=(journalctl --no-pager --output=cat --since="$_since" --until="$_until" --unit=omnia.service --grep="\"msg\":\"$MSG")
+echo >&2 ">>> ${_journalctlCall[*]}"
+
+_metrics=$(mktemp)
+while read -r _data; do
+	prepareMetrics "$MSG" "$_data" >> "$_metrics"
+done < <("${_journalctlCall[@]}")
+
+pushToGraphite "$_metrics"
+rm "$_metrics"
