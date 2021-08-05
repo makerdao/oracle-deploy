@@ -8,6 +8,7 @@ graphiteApiKey=$(jq -r '.graphiteApiKey' "$CONFIG_FILE")
 intervalSeconds=$(jq -c '.intervalSeconds' "$CONFIG_FILE")
 env=$(jq -r '.env' "$CONFIG_FILE")
 node=$(jq -r '.node' "$CONFIG_FILE")
+label=$(jq -r '.vars.label' "$CONFIG_FILE")
 grepMessage=$(jq -r '.grepMessage' "$CONFIG_FILE")
 lastRunTimeFile="${HOME}/.lastRunTime"
 
@@ -57,11 +58,12 @@ function prepareMetrics() {
 				--arg service "omnia" \
 				--arg metricGroup "gas" \
 				--arg metric "price" \
+				--arg metricLabel "$label" \
 				--argjson intervalSeconds "$intervalSeconds" \
 				'{
 					name:($env+"."+$node+"."+$service+"."+$metricGroup+"."+$metric),
 					value:((.params.gasPrice|tonumber)/1e9),time:.time,interval:$intervalSeconds,
-					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+$metric]
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"group="+$metricGroup,"metric="+$metric,"label="+$metricLabel]
 				}'
 			jq <<< "$2" -c \
 				--arg env "$env" \

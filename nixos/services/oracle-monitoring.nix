@@ -48,8 +48,8 @@ in {
       type = lib.types.listOf lib.types.attrs;
       default = [ ];
     };
-    var = lib.mkOption {
-      type = lib.types.str;
+    vars = lib.mkOption {
+      type = lib.types.attrs;
       default = "";
     };
 
@@ -62,7 +62,7 @@ in {
         intervalSeconds = cfg.intervalSeconds;
         env = node.env;
         node = node.name;
-        var = cfg.var;
+        vars = cfg.vars;
         ethRpcUrl = cfg.ethRpcUrl;
         contracts = cfg.contracts;
         grepMessage = cfg.grepMessage;
