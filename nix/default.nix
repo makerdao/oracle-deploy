@@ -2,12 +2,20 @@ let
   sources = import ./sources.nix;
   oracles-v2 = import sources.oracles-v2 { };
 in rec {
-  pkgs = import sources.nixpkgs { };
+  pkgs = import sources.nixpkgs {
+    config = {
+      packageOverrides = pkgs: {
+        shellcheck = pkgs.writeScriptBin "shellcheck" ''
+          #!${pkgs.stdenv.shell}
+          true
+        '';
+      };
+    };
+  };
   makerpkgs = import sources.makerpkgs { };
-  nixmaster = import sources.nixmaster { };
-  nixiform = import sources.nixiform { inherit pkgs; };
-
+  nixiform = pkgs.callPackage sources.nixiform { };
   journald-cloudwatch-logs-module = "${sources.nixos-journald-cloudwatch-logs}";
+
   deploy-median = import ./median { };
 
   oracle-bins = pkgs.callPackage ../bin/oracle {
@@ -15,7 +23,7 @@ in rec {
     inherit (oracles-v2) ssb-server;
   };
 
-  oracle-suite = import sources.oracle-suite { buildGoModule = (import sources.nixmaster { }).buildGo116Module; };
+  oracle-suite = pkgs.callPackage sources.oracle-suite { };
 
   monitor-bins = pkgs.callPackage ../bin/monitor {
     inherit makerpkgs;

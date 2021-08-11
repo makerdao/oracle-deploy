@@ -44,13 +44,17 @@ in {
       type = lib.types.str;
       default = "";
     };
+    network = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+    };
     contracts = lib.mkOption {
       type = lib.types.listOf lib.types.attrs;
       default = [ ];
     };
     vars = lib.mkOption {
       type = lib.types.attrs;
-      default = "";
+      default = { };
     };
 
     settings = lib.mkOption {
@@ -62,6 +66,7 @@ in {
         intervalSeconds = cfg.intervalSeconds;
         env = node.env;
         node = node.name;
+        network = cfg.network;
         vars = cfg.vars;
         ethRpcUrl = cfg.ethRpcUrl;
         contracts = cfg.contracts;

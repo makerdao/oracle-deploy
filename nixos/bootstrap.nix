@@ -3,7 +3,7 @@
   require = [
     (import ./services/oracle-suite.nix {
       name = "spire";
-      inherit oracle-suite monitor-bins;
+      inherit oracle-suite;
     })
   ];
   services.spire = {

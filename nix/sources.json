@@ -5,10 +5,10 @@
         "homepage": "",
         "owner": "makerdao",
         "repo": "makerpkgs",
-        "rev": "4d71760d27e88e244f9b5fe4d064b4c207b9b92d",
-        "sha256": "18fk24rpb5i2cyfmmgkwrz5cwwk2l68vj55q159yk6b8vvjdm4mz",
+        "rev": "76151418a2d9ffcfa55dec8acda5bde10f504224",
+        "sha256": "0vknhf3n54v6rgvq23rhi3b3lraczn9yzd7cw8i1hdxkb028f34r",
         "type": "tarball",
-        "url": "https://github.com/makerdao/makerpkgs/archive/4d71760d27e88e244f9b5fe4d064b4c207b9b92d.tar.gz",
+        "url": "https://github.com/makerdao/makerpkgs/archive/76151418a2d9ffcfa55dec8acda5bde10f504224.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -17,10 +17,10 @@
         "homepage": "https://github.com/nmattia/niv",
         "owner": "nmattia",
         "repo": "niv",
-        "rev": "9d35b9e4837ab88517210b1701127612c260eccf",
-        "sha256": "0q50xhnm8g2yfyakrh0nly4swyygxpi0a8cb9gp65wcakcgvzvdh",
+        "rev": "e0ca65c81a2d7a4d82a189f1e23a48d59ad42070",
+        "sha256": "1pq9nh1d8nn3xvbdny8fafzw87mj7gsmp6pxkdl65w2g18rmcmzx",
         "type": "tarball",
-        "url": "https://github.com/nmattia/niv/archive/9d35b9e4837ab88517210b1701127612c260eccf.tar.gz",
+        "url": "https://github.com/nmattia/niv/archive/e0ca65c81a2d7a4d82a189f1e23a48d59ad42070.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixiform": {
@@ -35,28 +35,16 @@
         "url": "https://github.com/icetan/nixiform/archive/ad3ce8fea3c7a4036fc065ecacb58d80d8db043d.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
-    "nixmaster": {
-        "branch": "master",
-        "description": "Nix Packages collection",
-        "homepage": "",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "224df6940f0f322c0cfaa8a7c6f58d0b890898df",
-        "sha256": "1zcjc2cjnbd7pmdwhskjladllh6as3lz4y8pbwgvn2ddi5gm6hsk",
-        "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/224df6940f0f322c0cfaa8a7c6f58d0b890898df.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
     "nixos": {
         "branch": "nixos-20.09",
         "description": "Nix Packages collection",
         "homepage": "",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "90cec09c3642b9be6699015a35e404ecb503aa0d",
-        "sha256": "0134xglcwrq8wp4mnxn6byww9pf2iipxghwpm92bdyknf79msdv1",
+        "rev": "068984c00e0d4e54b6684d98f6ac47c92dcb642e",
+        "sha256": "00j4xv4lhhqwry7jd67brnws4pwb8vn660n43pvxpkalbpxszwfg",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/90cec09c3642b9be6699015a35e404ecb503aa0d.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/068984c00e0d4e54b6684d98f6ac47c92dcb642e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixos-journald-cloudwatch-logs": {
@@ -77,10 +65,10 @@
         "homepage": "",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "8484c442ed31f125b1e27a6d98f5903ee6c36c98",
-        "sha256": "1jvg95gdgf9gc4w9jh643jk2jxqp1d0bqlxsp9n2m5k1bl4z5gaa",
+        "rev": "5f746317f10f7206f1dbb8dfcfc2257b04507eee",
+        "sha256": "1wx5g7a5bxa01pz7c5fdp5xk1gsj7dv6xwm1a17g6a8s2a2c05x3",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/8484c442ed31f125b1e27a6d98f5903ee6c36c98.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/5f746317f10f7206f1dbb8dfcfc2257b04507eee.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "oracle-suite": {
@@ -89,22 +77,22 @@
         "homepage": null,
         "owner": "makerdao",
         "repo": "oracle-suite",
-        "rev": "161b615d4d9c867b9c935e5231d16c4066677e3f",
-        "sha256": "0p35xf73rlq9d5pv4lz26f4n1cma122w2fznahg6lr2dqhjgdics",
+        "rev": "76bb3d975d63b7778c52ac665b99d07e01c79cfe",
+        "sha256": "07sj5vpr8q9kx4azaa8f0rscakrz2hbcza3xy871pkfr3gprz2p0",
         "type": "tarball",
-        "url": "https://github.com/makerdao/oracle-suite/archive/161b615d4d9c867b9c935e5231d16c4066677e3f.tar.gz",
+        "url": "https://github.com/makerdao/oracle-suite/archive/76bb3d975d63b7778c52ac665b99d07e01c79cfe.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "oracles-v2": {
-        "branch": "stable",
+        "branch": "master",
         "description": null,
         "homepage": null,
         "owner": "makerdao",
         "repo": "oracles-v2",
-        "rev": "ee6f4c5ca1582f5d8994c31fec3a290dc4800788",
-        "sha256": "18jvj63vafajf8i0rsa6y02zpalc0vh07svm6pq54f6yfsfk0y37",
+        "rev": "aed5182c05bb9f604392c0165ef0b21ea0a95174",
+        "sha256": "19y12zw6p3m5bv065pnqk1dy3y6j3r29w2gcg7wh4jzpv7y7rdq0",
         "type": "tarball",
-        "url": "https://github.com/makerdao/oracles-v2/archive/ee6f4c5ca1582f5d8994c31fec3a290dc4800788.tar.gz",
+        "url": "https://github.com/makerdao/oracles-v2/archive/aed5182c05bb9f604392c0165ef0b21ea0a95174.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

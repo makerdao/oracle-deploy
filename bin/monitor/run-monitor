@@ -8,6 +8,7 @@ intervalSeconds=$(jq -c '.intervalSeconds' "$CONFIG_FILE")
 env=$(jq -r '.env' "$CONFIG_FILE")
 node=$(jq -r '.node' "$CONFIG_FILE")
 ethRpcUrl=$(jq -r '.ethRpcUrl' "$CONFIG_FILE")
+network=$(jq -r '.network' "$CONFIG_FILE")
 contracts=$(jq -c '.contracts[]' "$CONFIG_FILE")
 
 echo >&2 "Gathering metrics to send to Graphite"
@@ -34,13 +35,14 @@ echo >&2 "Gathering metrics to send to Graphite"
 				--arg node "$node" \
 				--arg service "eth" \
 				--arg metric "contract_price" \
+				--arg network "$network" \
 				--argjson intervalSeconds "$intervalSeconds" \
 				'{
 					name:(.wat+"."+$metric),
 					value:(.price|tonumber),
 					time:.ts,
 					interval:$intervalSeconds,
-					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"symbol="+.wat]
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"symbol="+.wat,"network="+$network]
 				}'
 } \
 	| jq --slurp --compact-output \
