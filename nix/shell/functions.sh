@@ -47,4 +47,8 @@ function journal() {
 	set +x
 }
 
+function showInput(){
+	echo "$_nixiform_input"
+}
+
 _getInput
