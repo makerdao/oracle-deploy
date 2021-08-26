@@ -99,21 +99,9 @@ in {
           password = "${util.genKeys node}/password";
           rpc = lib.mkIf (cfg.ethereumRpc != "") cfg.ethereumRpc;
         };
+
         feeds = cfg.feeds;
-        spire = {
-          rpc = {
-            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
-            disable = cfg.disableRpc;
-          };
-          pairs = map (a: a.wat) cfg.contracts;
-        };
-        ghost = {
-          rpc = {
-            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
-            disable = cfg.disableRpc;
-          };
-          pairs = map (a: a.wat) cfg.contracts;
-        };
+
         transport = {
           p2p = {
             listenAddrs = [ "/ip4/${cfg.ip4Addr}/tcp/${toString cfg.tcpPort}" ];
@@ -123,19 +111,39 @@ in {
             directPeersAddrs = cfg.directPeersAddrs;
           };
         };
-        gofer = {
+
+        gofer = lib.mkIf (app == "gofer") default-config.gofer // {
           priceModels = default-config.gofer.priceModels;
           origins = lib.importJSON secretOriginsJSON;
         };
-        spectre.medianizers = builtins.listToAttrs (map (a: {
-          name = a.wat;
-          value = {
-            oracle = a.address;
-            oracleSpread = 0.5;
-            oracleExpiration = 600;
-            msgExpiration = 1800;
+
+        spire = lib.mkIf (app == "spire") default-config.spire // {
+          rpc = {
+            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
+            disable = cfg.disableRpc;
           };
-        }) cfg.contracts);
+          pairs = map (a: a.wat) cfg.contracts;
+        };
+
+        ghost = lib.mkIf (app == "ghost") default-config.ghost // {
+          rpc = {
+            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
+            disable = cfg.disableRpc;
+          };
+          pairs = map (a: a.wat) cfg.contracts;
+        };
+
+        spectre = lib.mkIf (app == "spectre") default-config.spectre // {
+          medianizers = builtins.listToAttrs (map (a: {
+            name = a.wat;
+            value = {
+              oracle = a.address;
+              oracleSpread = 0.5;
+              oracleExpiration = 600;
+              msgExpiration = 1800;
+            };
+          }) cfg.contracts);
+        };
       };
     };
   };

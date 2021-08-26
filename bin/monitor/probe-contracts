@@ -7,15 +7,16 @@ export ETH_RPC_URL="$1"
 cat | while read -r line
 do
   wat="$(jq -r '.wat' <<<"$line")"
-  address=$(jq -r '.address' <<<"$line")
-  if [[ -z "$wat" ]] || [[ -z "$address" ]]; then
+  addr=$(jq -r '.address' <<<"$line")
+  if [[ -z "$wat" ]] || [[ -z "$addr" ]]; then
   	continue
 	fi
 
-  rawStorage=$(seth storage "$address" 0x1)
+  rawStorage=$(seth storage "$addr" 0x1)
   jq --null-input --compact-output \
     --arg wat "$wat" \
+    --arg addr "$addr" \
     --arg price "$(seth --from-wei "$(seth --to-dec "${rawStorage:34:32}")")" \
     --argjson ts "$(date +%s)" \
-    '{wat:$wat,price:$price,ts:$ts}'
+    '{wat:$wat,price:$price,ts:$ts,addr:$addr}'
 done

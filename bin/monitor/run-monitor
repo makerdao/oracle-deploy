@@ -27,7 +27,7 @@ echo >&2 "Gathering metrics to send to Graphite"
 					time:.ts,
 					interval:$intervalSeconds,
 					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"symbol="+.wat]
-				}'
+				}|select(.value > 0)'
 
 		probe-contracts "$ethRpcUrl" <<< "$contracts" \
 			| jq --compact-output \
@@ -42,8 +42,8 @@ echo >&2 "Gathering metrics to send to Graphite"
 					value:(.price|tonumber),
 					time:.ts,
 					interval:$intervalSeconds,
-					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"symbol="+.wat,"network="+$network]
-				}'
+					tags:["sys=oracle","env="+$env,"node="+$node,"service="+$service,"metric="+$metric,"symbol="+.wat,"network="+$network,"addr="+.addr]
+				}|select(.value > 0)'
 } \
 	| jq --slurp --compact-output \
 	| curl --silent --request POST \
