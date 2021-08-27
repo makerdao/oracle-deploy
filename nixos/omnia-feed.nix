@@ -1,4 +1,5 @@
-{ omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { } }:
+{ omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { }, staticKeystore ? "", staticPassword ? "", staticFrom ? ""
+, feeds ? [ ] }:
 { pkgs, config, node, lib, input, options, ... }:
 let
   inherit (input) meta;
@@ -15,16 +16,16 @@ let
   keys = genKeys node;
   caps = genCaps node;
   eth-config = {
-    from = "0x${ethAddr node}";
-    keystore = "${keys}/keystore";
-    password = "${keys}/password";
+    from = if staticFrom == "" then "0x${ethAddr node}" else staticFrom;
+    keystore = if staticKeystore == "" then "${keys}/keystore" else staticKeystore;
+    password = if staticPassword == "" then "${keys}/password" else staticPassword;
   };
   default-config = lib.importJSON "${oracle-suite}/config.json";
   spire-config = {
     inherit (default-config) spire ethereum feeds transport;
   } // {
     ethereum = eth-config;
-    feeds = feedEthAddrs input.nodes;
+    feeds = (feedEthAddrs input.nodes) ++ feeds;
     transport.p2p.privKeySeed = "${peerSeed node}";
     transport.p2p.listenAddrs = [ "/ip4/0.0.0.0/tcp/${toString node.spire_port}" ];
     transport.p2p.bootstrapAddrs = bootMultiAddrs input.nodes;
@@ -58,4 +59,15 @@ in {
     }
     omniaMerge
   ]) // omniaOverride;
+
+  #  nixiform.filesIn.keystore = lib.mkIf (staticKeystore != "") {
+  #    path = "${toString /. + input.meta.rootPath + "/secret"}/${staticKeystore}";
+  #    user = "omnia";
+  #    group = "omnia";
+  #  };
+  #  nixiform.filesIn.password = lib.mkIf (staticPassword != "") {
+  #    path = "${toString /. + input.meta.rootPath + "/secret"}/${staticPassword}";
+  #    user = "omnia";
+  #    group = "omnia";
+  #  };
 }
