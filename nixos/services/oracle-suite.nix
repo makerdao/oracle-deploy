@@ -112,38 +112,46 @@ in {
           };
         };
 
-        gofer = lib.mkIf (app == "gofer") default-config.gofer // {
-          priceModels = default-config.gofer.priceModels;
-          origins = lib.importJSON secretOriginsJSON;
-        };
-
-        spire = lib.mkIf (app == "spire") default-config.spire // {
-          rpc = {
-            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
-            disable = cfg.disableRpc;
+        gofer = lib.mkIf (app == "gofer")
+        #default-config.gofer //
+          {
+            priceModels = default-config.gofer.priceModels;
+            origins = lib.importJSON secretOriginsJSON;
           };
-          pairs = map (a: a.wat) cfg.contracts;
-        };
 
-        ghost = lib.mkIf (app == "ghost") default-config.ghost // {
-          rpc = {
-            address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
-            disable = cfg.disableRpc;
-          };
-          pairs = map (a: a.wat) cfg.contracts;
-        };
-
-        spectre = lib.mkIf (app == "spectre") default-config.spectre // {
-          medianizers = builtins.listToAttrs (map (a: {
-            name = a.wat;
-            value = {
-              oracle = a.address;
-              oracleSpread = 0.5;
-              oracleExpiration = 600;
-              msgExpiration = 1800;
+        spire = lib.mkIf (app == "spire")
+        #default-config.spire //
+          {
+            rpc = {
+              address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
+              disable = cfg.disableRpc;
             };
-          }) cfg.contracts);
-        };
+            pairs = lib.unique (map (a: a.wat) cfg.contracts);
+          };
+
+        ghost = lib.mkIf (app == "ghost")
+        #default-config.ghost //
+          {
+            rpc = {
+              address = lib.mkIf (!cfg.disableRpc) "${cfg.rpcAddr}:${toString cfg.rpcPort}";
+              disable = cfg.disableRpc;
+            };
+            pairs = lib.unique (map (a: a.wat) cfg.contracts);
+          };
+
+        spectre = lib.mkIf (app == "spectre")
+        #default-config.spectre //
+          {
+            medianizers = builtins.listToAttrs (map (a: {
+              name = a.wat;
+              value = {
+                oracle = a.address;
+                oracleSpread = 0.5;
+                oracleExpiration = 600;
+                msgExpiration = 1800;
+              };
+            }) cfg.contracts);
+          };
       };
     };
   };
@@ -177,10 +185,10 @@ in {
         RestartSec = 5;
         ExecStart = ''
           ${oracle-suite}/bin/${app} \
-          --config /etc/${node.name}-${cfg.name}.json \
-          --log.verbosity ${cfg.logLevel} \
-          --log.format ${cfg.logFormat} \
-          agent'';
+                    --config ${settingsFormat.generate "${node.name}-${cfg.name}.json" cfg.settings} \
+                    --log.verbosity ${cfg.logLevel} \
+                    --log.format ${cfg.logFormat} \
+                    agent'';
       };
       environment = {
         GOLOG_LOG_LEVEL = cfg.internal.logLevel;

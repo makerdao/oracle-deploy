@@ -1,4 +1,4 @@
-{ omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { }, feeds }:
+{ omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { }, feeds, bootstraps }:
 { pkgs, config, input, node, lib, ... }:
 let
   inherit (input) meta;
@@ -25,10 +25,10 @@ let
     inherit (default-config) spire ethereum feeds transport;
   } // {
     ethereum = eth-config;
-    feeds = (feedEthAddrs input.nodes) ++ feeds;
+    feeds = feeds;
     transport.p2p.privKeySeed = "${peerSeed node}";
     transport.p2p.listenAddrs = [ "/ip4/0.0.0.0/tcp/${toString node.spire_port}" ];
-    transport.p2p.bootstrapAddrs = bootMultiAddrs input.nodes;
+    transport.p2p.bootstrapAddrs = if (builtins.length bootstraps) == 0 then bootMultiAddrs input.nodes else bootstraps;
   };
 in {
   require = [ omnia-module (import ./omnia-ssb.nix { inherit oracle-suite; }) ];
