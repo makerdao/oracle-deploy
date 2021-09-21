@@ -17,10 +17,10 @@
         "homepage": "https://github.com/nmattia/niv",
         "owner": "nmattia",
         "repo": "niv",
-        "rev": "e0ca65c81a2d7a4d82a189f1e23a48d59ad42070",
-        "sha256": "1pq9nh1d8nn3xvbdny8fafzw87mj7gsmp6pxkdl65w2g18rmcmzx",
+        "rev": "65a61b147f307d24bfd0a5cd56ce7d7b7cc61d2e",
+        "sha256": "17mirpsx5wyw262fpsd6n6m47jcgw8k2bwcp1iwdnrlzy4dhcgqh",
         "type": "tarball",
-        "url": "https://github.com/nmattia/niv/archive/e0ca65c81a2d7a4d82a189f1e23a48d59ad42070.tar.gz",
+        "url": "https://github.com/nmattia/niv/archive/65a61b147f307d24bfd0a5cd56ce7d7b7cc61d2e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixiform": {
@@ -65,10 +65,10 @@
         "homepage": "",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5f746317f10f7206f1dbb8dfcfc2257b04507eee",
-        "sha256": "1wx5g7a5bxa01pz7c5fdp5xk1gsj7dv6xwm1a17g6a8s2a2c05x3",
+        "rev": "e0ce3c683ae677cf5aab597d645520cddd13392b",
+        "sha256": "08ans3w6r4fbs1wx6lzlp4xwhy6p04x3spvvrjz5950w8mzxqm61",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/5f746317f10f7206f1dbb8dfcfc2257b04507eee.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/e0ce3c683ae677cf5aab597d645520cddd13392b.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "oracle-suite": {
@@ -77,10 +77,10 @@
         "homepage": null,
         "owner": "makerdao",
         "repo": "oracle-suite",
-        "rev": "76bb3d975d63b7778c52ac665b99d07e01c79cfe",
-        "sha256": "07sj5vpr8q9kx4azaa8f0rscakrz2hbcza3xy871pkfr3gprz2p0",
+        "rev": "67952ed1c4232c064fa3ae5f8766d716f3bebb55",
+        "sha256": "0d7bjfjf358nv4ja89pgas6fdlqq81s0cm9rhb9zyn1mlv8s6kp9",
         "type": "tarball",
-        "url": "https://github.com/makerdao/oracle-suite/archive/76bb3d975d63b7778c52ac665b99d07e01c79cfe.tar.gz",
+        "url": "https://github.com/makerdao/oracle-suite/archive/67952ed1c4232c064fa3ae5f8766d716f3bebb55.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "oracles-v2": {
@@ -89,10 +89,10 @@
         "homepage": null,
         "owner": "makerdao",
         "repo": "oracles-v2",
-        "rev": "aed5182c05bb9f604392c0165ef0b21ea0a95174",
-        "sha256": "19y12zw6p3m5bv065pnqk1dy3y6j3r29w2gcg7wh4jzpv7y7rdq0",
+        "rev": "c4e75b4488522e7b3c48e18db0c4680c52d83a54",
+        "sha256": "14rc3wl9cqis04xfy1l2bgxccrhdiml7c5z5061zd4b32n253lhf",
         "type": "tarball",
-        "url": "https://github.com/makerdao/oracles-v2/archive/aed5182c05bb9f604392c0165ef0b21ea0a95174.tar.gz",
+        "url": "https://github.com/makerdao/oracles-v2/archive/c4e75b4488522e7b3c48e18db0c4680c52d83a54.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

@@ -1,5 +1,6 @@
 { omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { }, staticKeystore ? "", staticPassword ? "", staticFrom ? ""
-, feeds ? [ ] }:
+, feeds ? [ ], ethRpc ? "" }:
+
 { pkgs, config, node, lib, input, options, ... }:
 let
   inherit (input) meta;
@@ -32,6 +33,7 @@ let
   };
   gofer-config = {
     gofer = {
+      inherit ethRpc;
       rpc = default-config.gofer.rpc;
       priceModels = default-config.gofer.priceModels;
       origins = lib.importJSON (/. + input.meta.rootPath + "/secret/origins.json");
