@@ -54,6 +54,7 @@ in {
         interval = 60;
         spireConfig = writeJSON "spire.json" spire-config;
         goferConfig = writeJSON "gofer.json" gofer-config;
+        setzerEthRpcUrl = ethRpc;
       };
       ethereum = eth-config;
       sources = [ "gofer" "setzer" ];
