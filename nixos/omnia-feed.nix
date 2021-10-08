@@ -1,5 +1,5 @@
 { omnia-module, oracle-suite, omniaMerge ? { }, omniaOverride ? { }, staticKeystore ? "", staticPassword ? "", staticFrom ? ""
-, feeds ? [ ], ethRpc ? "" }:
+, feeds ? [ ] }:
 
 { pkgs, config, node, lib, input, options, ... }:
 let
@@ -33,7 +33,7 @@ let
   };
   gofer-config = {
     gofer = {
-      inherit ethRpc;
+      ethRpc = default-config.gofer.ethRpc;
       rpc = default-config.gofer.rpc;
       priceModels = default-config.gofer.priceModels;
       origins = lib.importJSON (/. + input.meta.rootPath + "/secret/origins.json");
@@ -54,7 +54,6 @@ in {
         interval = 60;
         spireConfig = writeJSON "spire.json" spire-config;
         goferConfig = writeJSON "gofer.json" gofer-config;
-        setzerEthRpcUrl = ethRpc;
       };
       ethereum = eth-config;
       sources = [ "gofer" "setzer" ];
