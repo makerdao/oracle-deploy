@@ -41,7 +41,7 @@ in {
       options = {
         debug = false;
         verbose = false;
-        logFormat = "text";
+        logFormat = "json";
         interval = 60;
         spireConfig = writeJSON "spire.json" spire-config;
       };

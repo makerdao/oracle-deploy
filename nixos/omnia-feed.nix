@@ -51,6 +51,7 @@ in {
       options = {
         debug = false;
         verbose = true;
+        logFormat = "json";
         interval = 60;
         spireConfig = writeJSON "spire.json" spire-config;
         goferConfig = writeJSON "gofer.json" gofer-config;
