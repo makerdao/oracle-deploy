@@ -101,7 +101,7 @@ resource "aws_key_pair" "nixiform" {
 
 resource "aws_cloudwatch_log_group" "oracle" {
   name = "oracle-${var.name}-journal"
-
+  retention_in_days = 7
   tags = {
     Environment = "oracle-${var.name}"
     Application = "oracle"
